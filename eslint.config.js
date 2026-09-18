@@ -231,6 +231,9 @@ export default [
     plugins: {
       jest,
     },
+    // Tests run on Vitest (Jest-compatible API); tell the plugin which API
+    // version to lint against since the jest package isn't installed.
+    settings: {jest: {version: 29}},
     languageOptions: {
       globals: {
         ...globals.node,

@@ -12,10 +12,11 @@ import {
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
-import resetStyles from '~/styles/reset.css?url';
-import appStyles from '~/styles/app.css?url';
-import {PageLayout} from './components/PageLayout';
+import tailwindCss from './styles/tailwind.css?url';
+import {SiteShell} from '~/components/layout/SiteShell';
+import {getCatalog} from '~/lib/catalog';
+import {getDisplayableCampaigns} from '~/lib/offer-engine';
+import {SITE} from '~/lib/site';
 
 export type RootLoader = typeof loader;
 
@@ -94,51 +95,23 @@ export async function loader(args: Route.LoaderArgs) {
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Critical data: the slim catalogue index (cart + offer engine need it on
+ * every page) and the campaign the UI may advertise.
  */
 async function loadCriticalData({context}: Route.LoaderArgs) {
-  const {storefront} = context;
+  const catalog = getCatalog(context.env);
+  const now = new Date();
+  const [index, campaigns] = await Promise.all([catalog.getIndex(), catalog.getCampaigns()]);
+  const [campaign = null] = getDisplayableCampaigns(campaigns, {now, catalogSource: catalog.source});
 
-  const [header] = await Promise.all([
-    storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
-    }),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
-
-  return {header};
+  return {index, campaign, catalogSource: catalog.source, now: now.toISOString()};
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
+ * Non-critical data. Must not throw, so the page still renders.
  */
 function loadDeferredData({context}: Route.LoaderArgs) {
-  const {storefront, customerAccount, cart} = context;
-
-  // defer the footer query (below the fold)
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
-    })
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
-  return {
-    cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
-  };
+  return {cart: context.cart.get()};
 }
 
 export function Layout({children}: {children?: React.ReactNode}) {
@@ -149,8 +122,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={resetStyles}></link>
-        <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href={tailwindCss}></link>
         <Meta />
         <Links />
       </head>
@@ -176,9 +148,9 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
-      <PageLayout {...data}>
+      <SiteShell index={data.index} campaign={data.campaign} catalogSource={data.catalogSource}>
         <Outlet />
-      </PageLayout>
+      </SiteShell>
     </Analytics.Provider>
   );
 }
@@ -196,14 +168,17 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
+    <div className="container-page py-20">
+      <p className="kicker">Error {errorStatus}</p>
+      <h1 className="h-section mt-2">
+        {errorStatus === 404 ? 'This page doesn’t exist.' : 'Something went wrong.'}
+      </h1>
+      {errorMessage && errorStatus !== 404 ? (
+        <pre className="mt-4 text-sm whitespace-pre-wrap text-muted">{errorMessage}</pre>
+      ) : null}
+      <a href="/collections/all" className="btn-cta mt-6">
+        Browse all {SITE.name} tools
+      </a>
     </div>
   );
 }

@@ -1,15 +1,13 @@
-import {
-  useLoaderData,
-  data,
-  type HeadersFunction,
-} from 'react-router';
+import {useEffect} from 'react';
+import {Link, data, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
-import {CartMain} from '~/components/CartMain';
+import {useCart} from '~/components/cart/CartProvider';
+import {SITE} from '~/lib/site';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `Cart | ${SITE.name}`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -105,13 +103,27 @@ export async function loader({context}: Route.LoaderArgs) {
   return await cart.get();
 }
 
+/**
+ * The action above is the skeleton's Shopify cart API, kept for when products
+ * come from Shopify. While the catalogue is mock data, the cart is the
+ * client-side drawer, so /cart simply opens it.
+ */
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
+  const {open, lines, ready} = useCart();
+  useEffect(() => {
+    if (ready) open('cart_page');
+  }, [ready, open]);
 
   return (
-    <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+    <div className="container-page py-16">
+      <h1 className="h-section">Your cart</h1>
+      <p className="mt-2 text-ink/70">
+        {ready ? `${lines.length} ${lines.length === 1 ? 'item' : 'items'} in your cart.` : 'Loading…'}
+      </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button type="button" onClick={() => open('cart_page')} className="btn-cta">Open cart</button>
+        <Link to="/collections/all" className="btn-secondary">Continue shopping</Link>
+      </div>
     </div>
   );
 }

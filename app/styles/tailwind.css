@@ -1,0 +1,106 @@
+/**
+ * Design tokens (DESIGN_SYSTEM.md) — Tailwind v4 CSS-first config.
+ * Change the brand here only; components use the token names
+ * (bg-cta, text-ink, border-line…), never raw hex values.
+ */
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-ink: #111111;
+  --color-muted: #6b6b6b;
+  --color-paper: #f6f3ec;
+  --color-surface: #ffffff;
+  --color-line: #ddd9cf;
+  --color-cta: #ff5a1f;
+  --color-cta-hover: #e94b12;
+  --color-blue: #2457ff;
+  --color-success: #138a5b;
+  --color-sale: #d92d20;
+  --color-highlight: #fff1a8;
+
+  --radius-card: 14px;
+  --radius-control: 10px;
+
+  --shadow-press: 0 2px 0 0 var(--color-ink);
+  --shadow-card: 0 1px 0 0 var(--color-line), 0 8px 24px -16px rgb(17 17 17 / 0.18);
+
+  --animate-drawer-in: drawer-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-fade-in: fade-in 180ms ease-out;
+  --animate-pop: pop 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  @keyframes drawer-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 8rem;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1240px] px-4 sm:px-6;
+  }
+
+  /* Primary purchase action. Ink text on orange for AA contrast. */
+  .btn-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded-(--radius-control) border-[1.5px] border-ink bg-cta px-5 py-3 text-[15px] font-extrabold text-ink shadow-press transition-[background-color,transform,box-shadow] duration-100 hover:bg-cta-hover active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-(--radius-control) border-[1.5px] border-ink bg-surface px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:bg-ink hover:text-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm font-bold text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-ink;
+  }
+
+  .card {
+    @apply rounded-(--radius-card) border border-line bg-surface;
+  }
+
+  /* Section kicker: small uppercase label with a square marker. */
+  .kicker {
+    @apply inline-flex items-center gap-2 text-xs font-extrabold tracking-[0.08em] text-ink uppercase before:size-2 before:bg-cta before:content-[''];
+  }
+
+  .h-section {
+    @apply text-[28px] leading-[1.1] font-black tracking-[-0.02em] text-balance sm:text-[34px];
+  }
+
+  .price {
+    @apply font-black tracking-tight tabular-nums;
+  }
+
+  .marker {
+    @apply bg-highlight box-decoration-clone px-1;
+  }
+}

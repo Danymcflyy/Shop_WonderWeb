@@ -1,0 +1,42 @@
+import type {ReactNode} from 'react';
+import {Icon} from '~/components/ui/Icon';
+import {useCart, useCartStatus, type AddPlacement} from '~/components/cart/CartProvider';
+
+/**
+ * Cart-aware purchase button. Never lets a customer pay twice for the same
+ * file: a tool in the cart, or covered by a bundle in the cart, shows its
+ * state instead of adding again.
+ */
+export function AddToCartButton({
+  handle,
+  placement,
+  children = 'Add to cart',
+  className = 'btn-cta',
+}: {
+  handle: string;
+  placement: AddPlacement;
+  children?: ReactNode;
+  className?: string;
+}) {
+  const {add, open} = useCart();
+  const status = useCartStatus(handle);
+
+  if (status !== 'available') {
+    return (
+      <button
+        type="button"
+        onClick={() => open(`${placement}_in_cart`)}
+        className={`${className.replace('btn-cta', 'btn-secondary')} border-success text-success hover:bg-success/10 hover:text-success`}
+      >
+        <Icon name="check" />
+        {status === 'in-cart' ? 'In your cart' : 'Included in your bundle'}
+      </button>
+    );
+  }
+
+  return (
+    <button type="button" onClick={() => add(handle, placement)} className={className}>
+      {children}
+    </button>
+  );
+}
