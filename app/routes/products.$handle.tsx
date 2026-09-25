@@ -7,7 +7,7 @@ import {getBundleValue, getProductBundleOffer, isEligibleForCampaign, rankCrossS
 import {formatMoney} from '~/lib/money';
 import {productDimensions, track, useTrackOnView} from '~/lib/analytics';
 import {recordInterest} from '~/lib/personalization';
-import {FORMAT_LABELS, GENERAL_FAQ, MAIN_NAV, SITE} from '~/lib/site';
+import {FORMAT_LABELS, GENERAL_FAQ, getUniverse, SITE} from '~/lib/site';
 import {useNow} from '~/lib/use-now';
 import {useCart} from '~/components/cart/CartProvider';
 import {ProductPreview, FormatChip} from '~/components/product/ProductPreview';
@@ -31,6 +31,9 @@ const PROBLEM_COLLECTION: Record<string, {label: string; to: string}> = {
   organize: {label: 'Get organized', to: '/collections/get-organized'},
   marketing: {label: 'Marketing', to: '/collections/marketing'},
   local: {label: 'Local business', to: '/collections/local-business'},
+  money: {label: 'Budget & money', to: '/collections/money'},
+  home: {label: 'Organised home', to: '/collections/home'},
+  wellbeing: {label: 'Habits & wellbeing', to: '/collections/wellbeing'},
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {
@@ -40,6 +43,7 @@ export async function loader({params, context}: Route.LoaderArgs) {
 
   const summary = toSummary(product);
   return {
+    universe: product.universe,
     product,
     summary,
     // Related tools come from the offer definition, not from JSX.
@@ -61,7 +65,9 @@ export default function ProductPage() {
   const bundleValue = isBundle ? getBundleValue(summary, index) : null;
   const bundleOffer = isBundle ? null : getProductBundleOffer(summary, index);
   const countsTowardCampaign = campaign && isEligibleForCampaign(summary, campaign);
-  const breadcrumb = PROBLEM_COLLECTION[product.offer.problemTags[0]] ?? MAIN_NAV[MAIN_NAV.length - 1];
+  const universe = getUniverse(product.universe)!;
+  const breadcrumb =
+    PROBLEM_COLLECTION[product.offer.problemTags[0]] ?? {label: 'All tools', to: universe.allPath};
   const faq = [...product.faq, ...GENERAL_FAQ];
 
   useEffect(() => {
@@ -77,7 +83,11 @@ export default function ProductPage() {
           <li><Link to="/" className="hover:text-ink hover:underline">Home</Link></li>
           <li aria-hidden>/</li>
           <li>
-            <Link to={isBundle ? '/collections/bundles' : breadcrumb.to} className="hover:text-ink hover:underline">
+            <Link to={universe.path} className="hover:text-ink hover:underline">{universe.label}</Link>
+          </li>
+          <li aria-hidden>/</li>
+          <li>
+            <Link to={isBundle ? universe.bundlesPath : breadcrumb.to} className="hover:text-ink hover:underline">
               {isBundle ? 'Bundles' : breadcrumb.label}
             </Link>
           </li>

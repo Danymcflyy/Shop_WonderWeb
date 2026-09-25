@@ -6,7 +6,7 @@ import {getBundleValue} from '~/lib/offer-engine';
 import {formatMoney} from '~/lib/money';
 import {track} from '~/lib/analytics';
 import {recordInterest} from '~/lib/personalization';
-import {MAIN_NAV} from '~/lib/site';
+import {getUniverse, UNIVERSES} from '~/lib/site';
 import {useCart} from '~/components/cart/CartProvider';
 import {ProductCard} from '~/components/conversion/ProductCard';
 import {AddToCartButton} from '~/components/conversion/AddToCartButton';
@@ -44,7 +44,8 @@ export function CollectionView({collection, products, sort, business}: Collectio
   const bundle = collection.bundleHandle ? index[collection.bundleHandle] : undefined;
   const tools = products.filter((p) => !p.bundleItems);
   const fromCents = tools.length ? Math.min(...tools.map((p) => p.priceCents)) : null;
-  const showBusinessFilter = collection.kind === 'problem' || collection.kind === 'all';
+  const showBusinessFilter =
+    collection.universe === 'pro' && (collection.kind === 'problem' || collection.kind === 'all');
 
   useEffect(() => {
     track('view_collection', {
@@ -59,7 +60,12 @@ export function CollectionView({collection, products, sort, business}: Collectio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collection.handle]);
 
-  const related = MAIN_NAV.filter((item) => !item.children && item.to !== `/collections/${collection.handle}`);
+  // Sibling problems inside the same universe; on store-wide collections,
+  // point to the universes themselves.
+  const universe = getUniverse(collection.universe);
+  const related = universe
+    ? universe.nav.filter((item) => !item.children && item.to !== `/collections/${collection.handle}`)
+    : UNIVERSES.map((u) => ({label: `WonderWeb ${u.label}`, to: u.path}));
 
   return (
     <>
@@ -148,7 +154,9 @@ export function CollectionView({collection, products, sort, business}: Collectio
         )}
 
         <section className="mt-12">
-          <h2 className="text-xs font-extrabold tracking-[0.08em] uppercase">Other problems we solve</h2>
+          <h2 className="text-xs font-extrabold tracking-[0.08em] uppercase">
+            {universe ? 'Other problems we solve' : 'Browse by universe'}
+          </h2>
           <ul className="mt-3 flex flex-wrap gap-2">
             {related.map((item) => (
               <li key={item.to}>

@@ -17,6 +17,7 @@ import {SiteShell} from '~/components/layout/SiteShell';
 import {getCatalog} from '~/lib/catalog';
 import {getDisplayableCampaigns} from '~/lib/offer-engine';
 import {SITE} from '~/lib/site';
+import {getStoreJsonLd, serializeJsonLd} from '~/lib/seo';
 
 export type RootLoader = typeof loader;
 
@@ -84,7 +85,9 @@ export async function loader(args: Route.LoaderArgs) {
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
     consent: {
-      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+      // Falls back to the store domain until PUBLIC_CHECKOUT_DOMAIN is set in
+      // the Hydrogen storefront's environment variables (Shopify admin).
+      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN ?? env.PUBLIC_STORE_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: false,
       // localize the privacy banner
@@ -104,7 +107,8 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   const [index, campaigns] = await Promise.all([catalog.getIndex(), catalog.getCampaigns()]);
   const [campaign = null] = getDisplayableCampaigns(campaigns, {now, catalogSource: catalog.source});
 
-  return {index, campaign, catalogSource: catalog.source, now: now.toISOString()};
+  const checkoutEnabled = catalog.source === 'shopify' && (context.env as Env & {PUBLIC_CHECKOUT_ENABLED?: string}).PUBLIC_CHECKOUT_ENABLED === 'true';
+  return {index, campaign, catalogSource: catalog.source, checkoutEnabled, now: now.toISOString()};
 }
 
 /**
@@ -116,15 +120,26 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
+  const rootData = useRouteLoaderData<RootLoader>('root');
 
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="stylesheet" href={tailwindCss}></link>
         <Meta />
         <Links />
+        {!rootData?.checkoutEnabled ? (
+          <meta name="robots" content="noindex,nofollow,noarchive" />
+        ) : null}
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd(getStoreJsonLd(rootData?.publicStoreDomain)),
+          }}
+        />
       </head>
       <body>
         {children}
@@ -148,8 +163,14 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
-      <SiteShell index={data.index} campaign={data.campaign} catalogSource={data.catalogSource}>
-        <Outlet />
+      <SiteShell index={data.index} campaign={data.campaign} catalogSource={data.catalogSource} checkoutEnabled={data.checkoutEnabled}>
+        {data.catalogSource === 'shopify' && Object.keys(data.index).length === 0 ? (
+          <section className="container-page py-20" aria-labelledby="prelaunch-title">
+            <p className="kicker">Prévisualisation privée</p>
+            <h1 id="prelaunch-title" className="h-section mt-2">Le catalogue est en préparation.</h1>
+            <p className="mt-4 max-w-2xl text-muted">Les fiches, le paiement et la livraison numérique seront disponibles après vérification des produits Shopify et validation finale.</p>
+          </section>
+        ) : <Outlet />}
       </SiteShell>
     </Analytics.Provider>
   );

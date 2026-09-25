@@ -1,7 +1,9 @@
 import {Icon} from '~/components/ui/Icon';
 import {TRUST_ITEMS} from '~/lib/site';
+import {useCart} from '~/components/cart/CartProvider';
 
 export function TrustStrip({compact = false}: {compact?: boolean}) {
+  const {checkoutEnabled} = useCart();
   return (
     <ul
       className={
@@ -13,7 +15,9 @@ export function TrustStrip({compact = false}: {compact?: boolean}) {
       {TRUST_ITEMS.map((item) => (
         <li key={item.label} className="flex items-center gap-1.5">
           <Icon name={item.icon} className="size-4 shrink-0 text-success" />
-          {item.label}
+          {!checkoutEnabled && item.label === 'Secure Shopify checkout'
+            ? 'Shopify checkout setup pending'
+            : item.label}
         </li>
       ))}
     </ul>

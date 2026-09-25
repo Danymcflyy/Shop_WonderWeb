@@ -51,6 +51,35 @@ describe('catalogue integrity', () => {
   });
 });
 
+describe('universes', () => {
+  it('cross-sells and bundles never cross universes', () => {
+    for (const product of Object.values(index)) {
+      for (const rel of product.crossSells) {
+        expect(index[rel.handle].universe, `${product.handle} → ${rel.handle}`).toBe(product.universe);
+      }
+      for (const item of product.bundleItems ?? []) {
+        expect(index[item].universe, item).toBe(product.universe);
+      }
+    }
+  });
+
+  it('never offers a bundle upgrade from another universe', () => {
+    const offer = getBestBundleUpgrade(['household-budget-planner'], index, campaign);
+    expect(offer?.bundle.handle).toBe('home-money-bundle');
+    expect(offer?.bundle.universe).toBe('lifestyle');
+  });
+
+  it('applies the progress offer across universes', () => {
+    const totals = getCartTotals(
+      ['job-margin-calculator', 'household-budget-planner', 'habit-tracker'],
+      index,
+      campaign,
+    );
+    expect(totals.progress).toMatchObject({eligibleCount: 3, unlocked: true});
+    expect(totals.discountCents).toBe(Math.round((1200 + 1200 + 900) * 0.2));
+  });
+});
+
 describe('campaigns', () => {
   it('respects start and end dates', () => {
     const dated = {...campaign, startsAt: '2026-09-01T00:00:00Z', endsAt: '2026-09-10T00:00:00Z'};

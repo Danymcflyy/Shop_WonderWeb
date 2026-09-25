@@ -17,6 +17,8 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {useFetcher} from 'react-router';
+import {CartForm} from '@shopify/hydrogen';
 import type {Campaign, CatalogIndex} from '~/lib/catalog/types';
 import {
   addToCartLines,
@@ -31,6 +33,12 @@ import {
 import {productDimensions, track} from '~/lib/analytics';
 
 const STORAGE_KEY = 'tb:cart:v1';
+
+type ShopifyCart = {
+  checkoutUrl: string;
+  lines: {nodes: Array<{id: string; merchandise?: {product?: {handle: string}}}>};
+  cost?: {subtotalAmount?: {amount: string}; totalAmount?: {amount: string}};
+};
 
 export type AddPlacement =
   | 'pdp_hero'
@@ -48,9 +56,12 @@ type CartContextValue = {
   lines: CartLines;
   /** False until localStorage has been read, to avoid flashing an empty cart. */
   ready: boolean;
+  busy: boolean;
+  checkoutUrl: string | null;
   index: CatalogIndex;
   campaign: Campaign | null;
   catalogSource: 'mock' | 'shopify';
+  checkoutEnabled: boolean;
   totals: CartTotals;
   upgrade: BundleUpgradeOffer | null;
   notice: CartNotice;
@@ -80,32 +91,58 @@ export function CartProvider({
   index,
   campaign,
   catalogSource,
+  checkoutEnabled,
 }: {
   children: ReactNode;
   index: CatalogIndex;
   campaign: Campaign | null;
   catalogSource: 'mock' | 'shopify';
+  checkoutEnabled: boolean;
 }) {
   const [lines, setLines] = useState<CartLines>([]);
   const [ready, setReady] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [lineIds, setLineIds] = useState<Record<string, string>>({});
+  const fetcher = useFetcher<{cart?: ShopifyCart | null; errors?: unknown} | ShopifyCart | null>();
+  const busy = catalogSource === 'shopify' && fetcher.state !== 'idle';
+  const loadCart = fetcher.load;
   const [isOpen, setIsOpen] = useState(false);
   const [notice, setNotice] = useState<CartNotice>(null);
   const linesRef = useRef(lines);
   linesRef.current = lines;
 
   useEffect(() => {
-    setLines(readStoredLines(index));
-    setReady(true);
-  }, [index]);
+    if (catalogSource === 'shopify') {
+      void loadCart('/cart');
+    } else {
+      setLines(readStoredLines(index));
+      setReady(true);
+    }
+  }, [catalogSource, index, loadCart]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (catalogSource !== 'shopify' || fetcher.data === undefined) return;
+    if (fetcher.data && 'errors' in fetcher.data && (Array.isArray(fetcher.data.errors) ? fetcher.data.errors.length > 0 : Boolean(fetcher.data.errors))) {
+      setNotice({tone: 'info', message: 'Le panier Shopify est indisponible. Réessayez.'});
+      setReady(false);
+      return;
+    }
+    const cart = fetcher.data && 'lines' in fetcher.data ? fetcher.data as ShopifyCart : fetcher.data?.cart;
+    const nodes = cart?.lines?.nodes ?? [];
+    setLines(nodes.map(node => node.merchandise?.product?.handle).filter((handle): handle is string => !!handle && !!index[handle]));
+    setLineIds(Object.fromEntries(nodes.map(node => [node.merchandise?.product?.handle, node.id]).filter((pair): pair is [string, string] => !!pair[0])));
+    setCheckoutUrl(cart?.checkoutUrl || null);
+    setReady(true);
+  }, [catalogSource, fetcher.data, index]);
+
+  useEffect(() => {
+    if (!ready || catalogSource === 'shopify') return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
     } catch {
       // Storage unavailable: cart still works for this page view.
     }
-  }, [lines, ready]);
+  }, [lines, ready, catalogSource]);
 
   const totals = useMemo(() => getCartTotals(lines, index, campaign), [lines, index, campaign]);
   const upgrade = useMemo(
@@ -140,8 +177,26 @@ export function CartProvider({
 
   const add = useCallback(
     (handle: string, placement: AddPlacement) => {
+      if (!ready || busy) return {status: 'unknown', lines: linesRef.current, replaced: []} as AddResult;
       const result = addToCartLines(linesRef.current, handle, index);
       const product = index[handle];
+
+      if (result.status === 'added' && catalogSource === 'shopify') {
+        if (!product.variantId) {
+          setNotice({tone: 'info', message: 'Cette fiche ne peut pas encore être ajoutée au panier Shopify.'});
+          return {status: 'unknown', lines: linesRef.current, replaced: []} as AddResult;
+        }
+        void fetcher.submit(
+          {cartFormInput: JSON.stringify({
+            action: 'CustomFactoryReplace',
+            inputs: {
+              removeLineIds: result.replaced.map(h => lineIds[h]).filter(Boolean),
+              lines: [{merchandiseId: product.variantId, quantity: 1}],
+            },
+          })},
+          {method: 'POST', action: '/cart'},
+        );
+      }
 
       if (result.status === 'added') {
         setLines(result.lines);
@@ -168,26 +223,36 @@ export function CartProvider({
       setIsOpen(true);
       return result;
     },
-    [index],
+    [index, ready, busy, catalogSource, fetcher, lineIds],
   );
 
   const remove = useCallback(
     (handle: string) => {
+      if (!ready || busy) return;
+      if (catalogSource === 'shopify' && lineIds[handle]) {
+        void fetcher.submit(
+          {cartFormInput: JSON.stringify({action: CartForm.ACTIONS.LinesRemove, inputs: {lineIds: [lineIds[handle]]}})},
+          {method: 'POST', action: '/cart'},
+        );
+      }
       setLines((current) => removeFromCartLines(current, handle));
       setNotice(null);
       const product = index[handle];
       if (product) track('remove_from_cart', productDimensions(product));
     },
-    [index],
+    [index, ready, busy, catalogSource, lineIds, fetcher],
   );
 
   const value = useMemo<CartContextValue>(
     () => ({
       lines,
       ready,
+      busy,
+      checkoutUrl,
       index,
       campaign,
       catalogSource,
+      checkoutEnabled,
       totals,
       upgrade,
       notice,
@@ -197,7 +262,7 @@ export function CartProvider({
       open,
       close,
     }),
-    [lines, ready, index, campaign, catalogSource, totals, upgrade, notice, isOpen, add, remove, open, close],
+    [lines, ready, busy, checkoutUrl, index, campaign, catalogSource, checkoutEnabled, totals, upgrade, notice, isOpen, add, remove, open, close],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

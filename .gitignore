@@ -8,3 +8,9 @@ node_modules
 .env
 .shopify
 .react-router
+
+# Local publication handoff; contains the unpublished catalogue.
+/PUBLICATION_HANDOFF.md
+/publication/shopify-publication-manifest.json
+/publication/preview/
+/NEXT_CODEX_PROMPT.txt

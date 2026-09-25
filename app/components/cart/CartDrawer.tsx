@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {Link} from 'react-router';
 import {useCart} from '~/components/cart/CartProvider';
 import {CartProgress} from '~/components/conversion/CartProgress';
@@ -10,7 +10,8 @@ import {rankCrossSells} from '~/lib/offer-engine';
 import {readInterests} from '~/lib/personalization';
 import {formatMoney} from '~/lib/money';
 import {track} from '~/lib/analytics';
-import {PROBLEM_ENTRIES} from '~/lib/site';
+import {UNIVERSES} from '~/lib/site';
+import {useModalA11y} from '~/lib/use-modal-a11y';
 
 /**
  * Cart drawer — the main revenue surface after the product page
@@ -18,26 +19,13 @@ import {PROBLEM_ENTRIES} from '~/lib/site';
  * max two cross-sells, totals and checkout.
  */
 export function CartDrawer() {
-  const {isOpen, close, lines, ready, index, totals, upgrade, notice, remove, catalogSource} = useCart();
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const restoreFocus = useRef<HTMLElement | null>(null);
+  const {isOpen, close, lines, ready, busy, checkoutUrl, checkoutEnabled, index, totals, upgrade, notice, remove, catalogSource} = useCart();
   const [checkoutNote, setCheckoutNote] = useState(false);
+  const {dialogRef, initialFocusRef} = useModalA11y<HTMLElement>(isOpen, close);
 
   useEffect(() => {
-    if (!isOpen) return;
-    restoreFocus.current = document.activeElement as HTMLElement | null;
-    closeRef.current?.focus();
-    const {overflow} = document.body.style;
-    document.body.style.overflow = 'hidden';
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && close();
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = overflow;
-      document.removeEventListener('keydown', onKey);
-      restoreFocus.current?.focus?.();
-      setCheckoutNote(false);
-    };
-  }, [isOpen, close]);
+    if (!isOpen) setCheckoutNote(false);
+  }, [isOpen]);
 
   const crossSells = useMemo(
     () => (isOpen ? rankCrossSells(lines, lines, index, {interests: readInterests(), limit: upgrade ? 1 : 2}) : []),
@@ -47,12 +35,17 @@ export function CartDrawer() {
   if (!isOpen) return null;
 
   const beginCheckout = () => {
-    if (catalogSource === 'mock') {
+    track('begin_checkout', {
+      value: totals.totalCents / 100,
+      currency: 'EUR',
+      item_count: lines.length,
+      checkout_status: checkoutEnabled && checkoutUrl ? 'ready' : 'blocked_preview',
+    });
+    if (!checkoutEnabled || !checkoutUrl) {
       setCheckoutNote(true);
       return;
     }
-    track('begin_checkout', {value: totals.totalCents / 100, currency: 'EUR', item_count: lines.length});
-    // TODO(shopify): redirect to cart.checkoutUrl from the Storefront API cart.
+    window.location.assign(checkoutUrl);
   };
 
   return (
@@ -64,12 +57,12 @@ export function CartDrawer() {
         onClick={close}
         className="absolute inset-0 animate-fade-in bg-ink/45"
       />
-      <aside className="absolute inset-y-0 right-0 flex w-full max-w-[440px] animate-drawer-in flex-col bg-surface shadow-2xl">
+      <aside ref={dialogRef} tabIndex={-1} className="absolute inset-y-0 right-0 flex w-full max-w-[440px] animate-drawer-in flex-col bg-surface shadow-2xl">
         <header className="flex items-center justify-between border-b border-line px-4 py-3.5">
           <h2 id="cart-title" className="text-lg font-black">
             Your cart <span className="text-muted tabular-nums">({lines.length})</span>
           </h2>
-          <button ref={closeRef} type="button" onClick={close} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Close cart">
+          <button ref={initialFocusRef} type="button" onClick={close} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Close cart">
             <Icon name="close" className="size-5" />
           </button>
         </header>
@@ -154,16 +147,16 @@ export function CartDrawer() {
                 <dd className="price text-2xl">{formatMoney(totals.totalCents)}</dd>
               </div>
             </dl>
-            <button type="button" onClick={beginCheckout} className="btn-cta mt-3 w-full py-3.5 text-base">
-              <Icon name="lock" /> Secure checkout
+            <button type="button" onClick={beginCheckout} disabled={busy || !ready} className="btn-cta mt-3 w-full py-3.5 text-base disabled:opacity-50">
+              <Icon name="lock" /> {checkoutEnabled ? 'Paiement Shopify sécurisé' : 'Paiement en attente de validation'}
             </button>
             {checkoutNote ? (
               <p role="status" className="mt-2 rounded-md bg-highlight px-3 py-2 text-xs font-semibold">
-                Development mode: checkout opens once the store is linked to Shopify and products are imported.
+                Paiement indisponible dans cette prévisualisation. La livraison des fichiers doit être vérifiée avant l’activation.
               </p>
             ) : null}
             <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted">
-              <Icon name="download" className="size-3.5" /> Download link right after payment · One payment, no subscription
+              <Icon name="download" className="size-3.5" /> Un seul paiement · livraison numérique à vérifier
             </p>
           </footer>
         ) : null}
@@ -177,22 +170,30 @@ function EmptyCart({onNavigate}: {onNavigate: () => void}) {
     <div className="py-4">
       <p className="text-lg font-extrabold">Your cart is empty.</p>
       <p className="mt-1 text-sm text-muted">Start with the problem you want to fix:</p>
-      <ul className="mt-4 space-y-2">
-        {PROBLEM_ENTRIES.map((entry) => (
-          <li key={entry.collection}>
-            <Link
-              to={`/collections/${entry.collection}`}
-              onClick={onNavigate}
-              className="flex items-center justify-between rounded-md border border-line px-3 py-2.5 text-sm font-bold hover:border-ink"
-            >
-              {entry.label}
-              <Icon name="arrow" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {UNIVERSES.map((universe) => (
+        <section key={universe.id} data-universe={universe.id} className="mt-4">
+          <p className="mb-2 text-xs font-extrabold tracking-[0.08em] uppercase">
+            <span aria-hidden className="mr-1.5 inline-block size-2 bg-cta align-middle" />
+            {universe.label}
+          </p>
+          <ul className="space-y-2">
+            {universe.problems.map((entry) => (
+              <li key={entry.collection}>
+                <Link
+                  to={`/collections/${entry.collection}`}
+                  onClick={onNavigate}
+                  className="flex items-center justify-between rounded-md border border-line px-3 py-2.5 text-sm font-bold hover:border-ink"
+                >
+                  {entry.label}
+                  <Icon name="arrow" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
       <Link to="/collections/bundles" onClick={onNavigate} className="btn-ghost mt-4">
-        Or compare the bundles <Icon name="arrow" />
+        Or compare all bundles <Icon name="arrow" />
       </Link>
     </div>
   );

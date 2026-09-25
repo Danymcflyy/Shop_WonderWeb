@@ -16,7 +16,7 @@ export function AnnouncementBar({campaign}: {campaign: Campaign | null}) {
           <>
             <Link to="/collections/all" className="inline-flex items-center gap-1.5 font-bold hover:underline">
               <Icon name="tag" className="size-3.5 text-cta" />
-              {campaign.headline} — applied automatically at checkout
+              {campaign.headline} — {campaign.discountSource === 'mock' ? 'demo offer, Shopify activation pending' : 'applied automatically at checkout'}
             </Link>
             {campaign.endsAt ? <RealCountdown endsAt={campaign.endsAt} /> : null}
           </>

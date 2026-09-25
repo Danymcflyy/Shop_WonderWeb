@@ -1,4 +1,5 @@
 import {MOCK_CAMPAIGNS, MOCK_COLLECTIONS, MOCK_PRODUCTS} from './mock-data';
+import {createShopifyCatalog} from './shopify';
 import type {
   BusinessTypeId,
   Campaign,
@@ -40,7 +41,9 @@ export function toSummary(product: Product): ProductSummary {
   const {offer} = product;
   return {
     handle: product.handle,
+    universe: product.universe,
     factoryId: product.factoryId,
+    variantId: product.variantId,
     title: product.title,
     tagline: product.tagline,
     priceCents: product.priceCents,
@@ -63,6 +66,7 @@ export function matchesFilter(
   product: ProductSummary,
   filter: CollectionDefinition['filter'],
 ) {
+  if (filter.universe && product.universe !== filter.universe) return false;
   if (filter.problem && !product.problemTags.includes(filter.problem)) return false;
   if (filter.business && !product.businessTags.includes(filter.business)) return false;
   if (filter.tiers && !filter.tiers.includes(product.tier)) return false;
@@ -123,8 +127,9 @@ const mockCatalog: Catalog = {
   },
 };
 
-export function getCatalog(_env?: Env): Catalog {
-  // TODO(shopify): return a Storefront API catalogue once products and
-  // metafields exist. See storefront/README.md → "Shopify data mapping".
+export function getCatalog(env?: Env): Catalog {
+  if (env?.PUBLIC_STORE_DOMAIN && env?.PUBLIC_STOREFRONT_API_TOKEN) {
+    return createShopifyCatalog(env);
+  }
   return mockCatalog;
 }

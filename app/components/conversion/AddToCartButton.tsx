@@ -18,7 +18,7 @@ export function AddToCartButton({
   children?: ReactNode;
   className?: string;
 }) {
-  const {add, open} = useCart();
+  const {add, open, ready, busy} = useCart();
   const status = useCartStatus(handle);
 
   if (status !== 'available') {
@@ -35,8 +35,8 @@ export function AddToCartButton({
   }
 
   return (
-    <button type="button" onClick={() => add(handle, placement)} className={className}>
-      {children}
+    <button type="button" onClick={() => add(handle, placement)} disabled={!ready || busy} className={`${className} disabled:opacity-50`}>
+      {busy ? 'Ajout en cours…' : children}
     </button>
   );
 }

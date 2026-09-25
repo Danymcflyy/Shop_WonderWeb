@@ -12,7 +12,20 @@ export type Tier = 'impulse' | 'core' | 'bundle' | 'vault';
 /** `best-seller` is only valid when backed by `salesRank` (real sales data). */
 export type Badge = 'new' | 'featured' | 'best-seller';
 
-export type ProblemId = 'find-clients' | 'profit' | 'organize' | 'marketing' | 'local';
+/** Top-level store sections. Each has its own homepage, navigation and accent. */
+export type UniverseId = 'pro' | 'lifestyle';
+
+export type ProblemId =
+  // Pro
+  | 'find-clients'
+  | 'profit'
+  | 'organize'
+  | 'marketing'
+  | 'local'
+  // Lifestyle
+  | 'money'
+  | 'home'
+  | 'wellbeing';
 
 export type BusinessTypeId =
   | 'artisans'
@@ -45,7 +58,10 @@ export type OfferDefinition = {
 
 export type Product = {
   handle: string;
+  universe: UniverseId;
   factoryId: string;
+  /** Real Shopify variant ID, required for cart mutations. */
+  variantId?: string;
   title: string;
   /** One-line outcome shown under the title and on cards. */
   tagline: string;
@@ -73,7 +89,9 @@ export type Product = {
 export type ProductSummary = Pick<
   Product,
   | 'handle'
+  | 'universe'
   | 'factoryId'
+  | 'variantId'
   | 'title'
   | 'tagline'
   | 'priceCents'
@@ -96,13 +114,15 @@ export type CatalogIndex = Record<string, ProductSummary>;
 
 export type CollectionDefinition = {
   handle: string;
+  /** Undefined for store-wide collections (all universes). */
+  universe?: UniverseId;
   kind: 'problem' | 'business' | 'bundles' | 'all';
   title: string;
   /** The pain, in the customer's words. Shown first on the collection page. */
   problem: string;
   /** What the tools in this collection get you. */
   outcome: string;
-  filter: {problem?: ProblemId; business?: BusinessTypeId; tiers?: Tier[]};
+  filter: {universe?: UniverseId; problem?: ProblemId; business?: BusinessTypeId; tiers?: Tier[]};
   /** Bundle surfaced at the top of the collection. */
   bundleHandle?: string;
 };
