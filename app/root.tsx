@@ -157,6 +157,16 @@ export default function App() {
     return <Outlet />;
   }
 
+  if (data.catalogSource === 'shopify' && Object.keys(data.index).length === 0) {
+    return (
+      <main className="container-page py-20" id="main" aria-labelledby="prelaunch-title">
+        <p className="kicker">WonderWeb · prévisualisation privée</p>
+        <h1 id="prelaunch-title" className="h-section mt-2">Le catalogue est en préparation.</h1>
+        <p className="mt-4 max-w-2xl text-muted">Les fiches, le paiement et la livraison numérique seront disponibles après vérification des produits Shopify et validation finale.</p>
+      </main>
+    );
+  }
+
   return (
     <Analytics.Provider
       cart={data.cart}
@@ -164,13 +174,7 @@ export default function App() {
       consent={data.consent}
     >
       <SiteShell index={data.index} campaign={data.campaign} catalogSource={data.catalogSource} checkoutEnabled={data.checkoutEnabled}>
-        {data.catalogSource === 'shopify' && Object.keys(data.index).length === 0 ? (
-          <section className="container-page py-20" aria-labelledby="prelaunch-title">
-            <p className="kicker">Prévisualisation privée</p>
-            <h1 id="prelaunch-title" className="h-section mt-2">Le catalogue est en préparation.</h1>
-            <p className="mt-4 max-w-2xl text-muted">Les fiches, le paiement et la livraison numérique seront disponibles après vérification des produits Shopify et validation finale.</p>
-          </section>
-        ) : <Outlet />}
+        <Outlet />
       </SiteShell>
     </Analytics.Provider>
   );

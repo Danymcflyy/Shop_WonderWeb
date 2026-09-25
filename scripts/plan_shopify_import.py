@@ -33,6 +33,40 @@ def clean_markdown(value):
     return re.sub(r'\s+', ' ', re.sub(r'[#*_>`\[\]]', '', value)).strip()
 
 
+def listing_html(markdown):
+    def inline(value):
+        escaped = html.escape(value)
+        escaped = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped)
+        return re.sub(r'`(.+?)`', r'<code>\1</code>', escaped)
+
+    chunks, in_list = [], False
+    for raw in markdown.splitlines():
+        line = raw.strip()
+        if not line:
+            if in_list:
+                chunks.append('</ul>')
+                in_list = False
+            continue
+        if line.startswith('## '):
+            if in_list:
+                chunks.append('</ul>')
+                in_list = False
+            chunks.append(f'<h2>{inline(line[3:])}</h2>')
+        elif re.match(r'^(?:- |\d+\. )', line):
+            if not in_list:
+                chunks.append('<ul>')
+                in_list = True
+            chunks.append(f'<li>{inline(re.sub(r"^(?:- |\d+\. )", "", line))}</li>')
+        else:
+            if in_list:
+                chunks.append('</ul>')
+                in_list = False
+            chunks.append(f'<p>{inline(line)}</p>')
+    if in_list:
+        chunks.append('</ul>')
+    return ''.join(chunks)
+
+
 def main():
     global FACTORY
     parser = argparse.ArgumentParser(description=__doc__)
@@ -118,6 +152,7 @@ def main():
         description = checked_path(product['listing']['short-description.txt']).read_text().strip()
         seo_title = checked_path(product['listing']['seo-title.txt']).read_text().strip()
         seo_description = checked_path(product['listing']['seo-description.txt']).read_text().strip()
+        long_description = checked_path(product['listing']['long-description.md']).read_text().strip()
         included = [
             {'name': Path(path).name, 'format': Path(path).suffix.lower().lstrip('.'), 'detail': ''}
             for path in product['customerFiles']
@@ -158,7 +193,7 @@ def main():
         }
         payloads.append({
             'factoryId': fid, 'handle': product['proposedHandle'], 'status': 'DRAFT',
-            'title': title, 'descriptionHtml': '<p>' + html.escape(description) + '</p>',
+            'title': title, 'descriptionHtml': listing_html(long_description),
             'seo': {'title': seo_title, 'description': seo_description},
             'priceTtcEur': product['recommendedPriceTtcEur'],
             'metafields': {'custom.factory_id': fid, 'custom.factory_data': factory_data},

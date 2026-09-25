@@ -1,0 +1,12 @@
+query FactoryAdminSnapshot($cursor: String) {
+  products(first: 250, after: $cursor) {
+    pageInfo { hasNextPage endCursor }
+    nodes {
+      id
+      handle
+      status
+      factoryId: metafield(namespace: "custom", key: "factory_id") { value }
+      variants(first: 1) { nodes { id } }
+    }
+  }
+}
