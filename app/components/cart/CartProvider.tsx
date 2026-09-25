@@ -1,12 +1,4 @@
-/**
- * Cart state for the Golden Path.
- *
- * While the catalogue is mock data, the cart lives in localStorage: mock
- * products have no Shopify variant IDs, so Storefront API cart mutations
- * can't accept them. All commercial rules live in ~/lib/offer-engine, so
- * swapping persistence for Hydrogen's CartForm/`context.cart` later changes
- * this file only.
- */
+/** Shopify carts use Hydrogen actions; local mock catalogues use localStorage. */
 import {
   createContext,
   useCallback,
@@ -109,6 +101,7 @@ export function CartProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [notice, setNotice] = useState<CartNotice>(null);
   const linesRef = useRef(lines);
+  const pendingRef = useRef<{kind: 'add' | 'remove'; handle: string; placement?: AddPlacement; replaced?: string[]} | null>(null);
   linesRef.current = lines;
 
   useEffect(() => {
@@ -122,17 +115,35 @@ export function CartProvider({
 
   useEffect(() => {
     if (catalogSource !== 'shopify' || fetcher.data === undefined) return;
-    if (fetcher.data && 'errors' in fetcher.data && (Array.isArray(fetcher.data.errors) ? fetcher.data.errors.length > 0 : Boolean(fetcher.data.errors))) {
-      setNotice({tone: 'info', message: 'Le panier Shopify est indisponible. Réessayez.'});
-      setReady(false);
-      return;
-    }
+    const hasErrors = Boolean(fetcher.data && 'errors' in fetcher.data && (Array.isArray(fetcher.data.errors) ? fetcher.data.errors.length > 0 : fetcher.data.errors));
     const cart = fetcher.data && 'lines' in fetcher.data ? fetcher.data as ShopifyCart : fetcher.data?.cart;
     const nodes = cart?.lines?.nodes ?? [];
-    setLines(nodes.map(node => node.merchandise?.product?.handle).filter((handle): handle is string => !!handle && !!index[handle]));
-    setLineIds(Object.fromEntries(nodes.map(node => [node.merchandise?.product?.handle, node.id]).filter((pair): pair is [string, string] => !!pair[0])));
-    setCheckoutUrl(cart?.checkoutUrl || null);
+    if (cart) {
+      setLines(nodes.map(node => node.merchandise?.product?.handle).filter((handle): handle is string => !!handle && !!index[handle]));
+      setLineIds(Object.fromEntries(nodes.map(node => [node.merchandise?.product?.handle, node.id]).filter((pair): pair is [string, string] => !!pair[0])));
+    }
+    setCheckoutUrl(hasErrors ? null : cart?.checkoutUrl || null);
     setReady(true);
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (hasErrors || (pending && !cart)) {
+      setNotice({tone: 'info', message: 'Le panier Shopify n’a pas confirmé cette modification. Vérifiez son contenu avant de continuer.'});
+    } else if (pending?.kind === 'add') {
+      const product = index[pending.handle];
+      const replacedTitles = pending.replaced?.map(h => index[h]?.title).filter(Boolean) ?? [];
+      setNotice({tone: 'success', message: replacedTitles.length
+        ? `${product.title} ajouté. ${replacedTitles.join(' et ')} ${replacedTitles.length > 1 ? 'ont été retirés' : 'a été retiré'} du panier pour éviter un double achat.`
+        : `${product.title} ajouté au panier.`});
+      const dims = {...productDimensions(product), placement: pending.placement};
+      if (pending.placement === 'cart_cross_sell') track('add_cross_sell', dims);
+      else if (pending.placement === 'cart_bundle_upgrade' || pending.placement === 'pdp_bundle') {
+        track('accept_bundle_upgrade', {...dims, bundle_id: product.factoryId, replaced: pending.replaced ?? []});
+      }
+      track('add_to_cart', dims);
+    } else if (pending?.kind === 'remove' && index[pending.handle]) {
+      track('remove_from_cart', productDimensions(index[pending.handle]));
+      setNotice(null);
+    }
   }, [catalogSource, fetcher.data, index]);
 
   useEffect(() => {
@@ -186,6 +197,7 @@ export function CartProvider({
           setNotice({tone: 'info', message: 'Cette fiche ne peut pas encore être ajoutée au panier Shopify.'});
           return {status: 'unknown', lines: linesRef.current, replaced: []} as AddResult;
         }
+        pendingRef.current = {kind: 'add', handle, placement, replaced: result.replaced};
         void fetcher.submit(
           {cartFormInput: JSON.stringify({
             action: 'CustomFactoryReplace',
@@ -196,6 +208,8 @@ export function CartProvider({
           })},
           {method: 'POST', action: '/cart'},
         );
+        setIsOpen(true);
+        return result;
       }
 
       if (result.status === 'added') {
@@ -204,8 +218,8 @@ export function CartProvider({
         setNotice({
           tone: 'success',
           message: replacedTitles.length
-            ? `${product.title} added. It includes ${replacedTitles.join(' and ')}, so ${replacedTitles.length > 1 ? 'they were' : 'it was'} removed — you won’t pay twice.`
-            : `${product.title} added to your cart.`,
+            ? `${product.title} ajouté. ${replacedTitles.join(' et ')} ${replacedTitles.length > 1 ? 'ont été retirés' : 'a été retiré'} du panier pour éviter un double achat.`
+            : `${product.title} ajouté au panier.`,
         });
 
         const dims = {...productDimensions(product), placement};
@@ -215,9 +229,9 @@ export function CartProvider({
         }
         track('add_to_cart', dims);
       } else if (result.status === 'covered-by-bundle') {
-        setNotice({tone: 'info', message: `${product.title} is already included in a bundle in your cart.`});
+        setNotice({tone: 'info', message: `${product.title} est déjà inclus dans un pack de votre panier.`});
       } else if (result.status === 'already-in-cart') {
-        setNotice({tone: 'info', message: `${product.title} is already in your cart.`});
+        setNotice({tone: 'info', message: `${product.title} est déjà dans votre panier.`});
       }
 
       setIsOpen(true);
@@ -230,10 +244,12 @@ export function CartProvider({
     (handle: string) => {
       if (!ready || busy) return;
       if (catalogSource === 'shopify' && lineIds[handle]) {
+        pendingRef.current = {kind: 'remove', handle};
         void fetcher.submit(
           {cartFormInput: JSON.stringify({action: CartForm.ACTIONS.LinesRemove, inputs: {lineIds: [lineIds[handle]]}})},
           {method: 'POST', action: '/cart'},
         );
+        return;
       }
       setLines((current) => removeFromCartLines(current, handle));
       setNotice(null);

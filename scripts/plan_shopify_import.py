@@ -73,8 +73,11 @@ def main():
     parser.add_argument('--factory', type=Path, default=FACTORY)
     parser.add_argument('--manifest', type=Path, default=MANIFEST)
     parser.add_argument('--snapshot', type=Path, help='Admin product snapshot JSON')
+    parser.add_argument('--admin-store', help='Exact myshopify.com domain for private draft review links')
     parser.add_argument('--output', type=Path, default=OUTPUT)
     args = parser.parse_args()
+    if args.admin_store and not re.fullmatch(r'[a-z0-9][a-z0-9-]*\.myshopify\.com', args.admin_store):
+        parser.error('--admin-store must be a myshopify.com domain')
     FACTORY = args.factory.resolve()
     source = json.loads(args.manifest.read_text())
     products = source['products']
@@ -250,7 +253,12 @@ def main():
         esc = lambda key: html.escape(str(row[key]), quote=True)
         components = f"<p>Contient : {esc('bundle_product_ids')}</p>" if row['bundle_product_ids'] else ''
         gallery_link = f'<p><a href="#gallery-{esc("factory_id")}">Voir les neuf images</a></p>' if row['factory_id'] in selected else ''
-        cards.append(f'''<article class="card" id="{esc('factory_id')}"><img src="{esc('cover')}" alt="Aperçu réel de {esc('title')}" loading="lazy"><div class="body"><small>{esc('universe')} · {esc('format')} · {esc('factory_id')}</small><h2>{esc('title')}</h2><p>{esc('subtitle')}</p><p>{esc('description')}</p>{components}<strong>{esc('price_ttc_eur')} € TTC</strong>{gallery_link}<p class="state">{esc('plan_action')} · Livraison non vérifiée</p></div></article>''')
+        admin_link = ''
+        if args.admin_store and row['shopify_product_id']:
+            numeric_id = row['shopify_product_id'].rsplit('/', 1)[-1]
+            if numeric_id.isdigit():
+                admin_link = f'<p><a href="https://admin.shopify.com/store/{html.escape(args.admin_store.removesuffix(".myshopify.com"), quote=True)}/products/{numeric_id}">Ouvrir le brouillon Shopify</a></p>'
+        cards.append(f'''<article class="card" id="{esc('factory_id')}"><img src="{esc('cover')}" alt="Aperçu réel de {esc('title')}" loading="lazy"><div class="body"><small>{esc('universe')} · {esc('format')} · {esc('factory_id')}</small><h2>{esc('title')}</h2><p>{esc('subtitle')}</p><p>{esc('description')}</p>{components}<strong>{esc('price_ttc_eur')} € TTC</strong>{gallery_link}{admin_link}<p class="state">{esc('plan_action')} · Livraison non vérifiée</p></div></article>''')
     sample_rows = [r for r in rows if r['factory_id'] in selected]
     gallery_sections = ''.join(f'''<section class="gallery" id="gallery-{html.escape(row['factory_id'])}"><h2>{html.escape(row['factory_id'])} · {html.escape(row['title'])}</h2><div class="gallery-grid">{''.join(f'<img src="galleries/{row["factory_id"]}/{i:02d}.png" alt="Image réelle {i} de {html.escape(row["title"])}" loading="lazy">' for i in range(1,10))}</div></section>''' for row in sample_rows)
     page = '''<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prévisualisation privée WonderWeb — 120 produits</title><style>body{margin:0;background:#f6f3ec;color:#111;font:16px system-ui}header{padding:2rem max(1rem,4vw);background:#111;color:white}h1{margin:0 0 .5rem}main,.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;padding:2rem max(1rem,4vw)}.card{background:white;border:1px solid #ddd9cf;border-radius:12px;overflow:hidden}.card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.body{padding:1rem}.body h2{font-size:1.2rem}.body p{line-height:1.45}.state{font-size:.85rem;color:#6b6b6b}strong{color:#d64211}.gallery{padding:2rem max(1rem,4vw);border-top:1px solid #ddd9cf}.gallery-grid{padding:0}.gallery-grid img{width:100%;background:white;border:1px solid #ddd9cf}</style><header><h1>WonderWeb · prévisualisation privée du catalogue</h1><p>120 fiches issues de la fabrique. Prix recommandés TTC ; les prix Shopify publics, le paiement et la livraison doivent encore être vérifiés. Aucune fiche n’est annoncée publiée.</p></header><main>''' + ''.join(cards) + '</main><div id="galleries"><h2 style="padding:1rem 4vw">Galeries de contrôle · chaque univers, format et bundle</h2>' + gallery_sections + '</div></html>'

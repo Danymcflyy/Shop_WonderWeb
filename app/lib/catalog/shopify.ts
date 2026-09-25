@@ -34,7 +34,7 @@ export const SHOPIFY_CATALOG_QUERY = `#graphql
     products(first: 250, after: $cursor) {
       pageInfo { hasNextPage endCursor }
       nodes {
-        id handle title description createdAt
+        id handle title description publishedAt
         factoryId: metafield(namespace: "custom", key: "factory_id") { value }
         factoryData: metafield(namespace: "custom", key: "factory_data") { value }
         images(first: 9) { nodes { url altText } }
@@ -48,7 +48,7 @@ type ShopifyNode = {
   handle: string;
   title: string;
   description: string;
-  createdAt: string;
+  publishedAt: string;
   factoryId: {value: string} | null;
   factoryData: {value: string} | null;
   images: {nodes: Array<{url: string; altText: string | null}>};
@@ -76,7 +76,7 @@ function mapProduct(node: ShopifyNode): Product | null {
     title: node.title,
     tagline: data.tagline || node.description,
     priceCents: cents,
-    publishedAt: node.createdAt,
+    publishedAt: node.publishedAt,
     preview: {kind: data.preview?.kind || 'doc', imageUrl: image?.url, alt: image?.altText || node.title},
     // These required values are checked above and supplied by the draft import.
     offer: data.offer,

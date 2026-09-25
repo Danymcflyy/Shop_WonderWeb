@@ -48,6 +48,28 @@ every row is `needs_admin_lookup`; no creation is assumed. Passing
 `--snapshot admin-products.json` classifies draft creates, updates and
 conflicts by `custom.factory_id` and handle.
 
+After authenticating Shopify CLI for the intended store with product and file
+read/write scopes, create the two `custom` product metafield definitions with
+Storefront `PUBLIC_READ` access using `admin-metafield-definition-create.graphql`.
+The draft importer checks those definitions, the exact store, EUR currency,
+tax-inclusive prices, duplicate IDs and conflicting handles before writing.
+It stages the nine real images per product and creates only `DRAFT` products.
+Rerunning skips existing matching drafts instead of duplicating them:
+
+```bash
+python3 scripts/import_shopify_drafts.py \
+  --store your-store.myshopify.com \
+  --factory /path/to/digital-product-factory
+python3 scripts/verify_shopify_drafts.py \
+  --store your-store.myshopify.com \
+  --factory /path/to/digital-product-factory
+```
+
+The verification report and ZIP-to-variant attachment list are written only
+under the ignored `publication/preview/` directory. A changed existing draft
+is reported by verification for review; the importer does not silently replace
+it or change an active product.
+
 The ZIP archives must be attached through a protected post-payment delivery
 solution. Shopify's free Digital Products app supports ZIP assets and automatic
 delivery after payment. This attachment and the real purchase test are still
