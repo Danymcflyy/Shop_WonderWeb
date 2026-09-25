@@ -107,7 +107,7 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   const [index, campaigns] = await Promise.all([catalog.getIndex(), catalog.getCampaigns()]);
   const [campaign = null] = getDisplayableCampaigns(campaigns, {now, catalogSource: catalog.source});
 
-  const checkoutEnabled = catalog.source === 'shopify' && (context.env as Env & {PUBLIC_CHECKOUT_ENABLED?: string}).PUBLIC_CHECKOUT_ENABLED === 'true';
+  const checkoutEnabled = catalog.source === 'shopify' && Object.keys(index).length === 120 && (context.env as Env & {PUBLIC_CHECKOUT_ENABLED?: string}).PUBLIC_CHECKOUT_ENABLED === 'true';
   return {index, campaign, catalogSource: catalog.source, checkoutEnabled, now: now.toISOString()};
 }
 
@@ -136,6 +136,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <script
           type="application/ld+json"
           nonce={nonce}
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: serializeJsonLd(getStoreJsonLd(rootData?.publicStoreDomain)),
           }}

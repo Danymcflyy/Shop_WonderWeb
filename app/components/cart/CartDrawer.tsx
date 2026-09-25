@@ -19,7 +19,7 @@ import {useModalA11y} from '~/lib/use-modal-a11y';
  * max two cross-sells, totals and checkout.
  */
 export function CartDrawer() {
-  const {isOpen, close, lines, ready, busy, checkoutUrl, checkoutEnabled, index, totals, upgrade, notice, remove, catalogSource} = useCart();
+  const {isOpen, close, lines, ready, busy, checkoutUrl, checkoutEnabled, index, totals, upgrade, notice, remove} = useCart();
   const [checkoutNote, setCheckoutNote] = useState(false);
   const {dialogRef, initialFocusRef} = useModalA11y<HTMLElement>(isOpen, close);
 
@@ -35,16 +35,16 @@ export function CartDrawer() {
   if (!isOpen) return null;
 
   const beginCheckout = () => {
+    if (!checkoutEnabled || !checkoutUrl) {
+      track('checkout_blocked', {item_count: lines.length, reason: 'preview'});
+      setCheckoutNote(true);
+      return;
+    }
     track('begin_checkout', {
       value: totals.totalCents / 100,
       currency: 'EUR',
       item_count: lines.length,
-      checkout_status: checkoutEnabled && checkoutUrl ? 'ready' : 'blocked_preview',
     });
-    if (!checkoutEnabled || !checkoutUrl) {
-      setCheckoutNote(true);
-      return;
-    }
     window.location.assign(checkoutUrl);
   };
 

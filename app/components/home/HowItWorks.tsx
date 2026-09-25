@@ -5,14 +5,14 @@ export function HowItWorks() {
     <section className="container-page pb-12">
       <div className="card grid gap-6 p-5 sm:p-8 md:grid-cols-[1fr_2fr]">
         <div>
-          <p className="kicker">How it works</p>
-          <h2 className="h-section mt-2">From checkout to using the tool: about two minutes.</h2>
+          <p className="kicker">Comment ça marche</p>
+          <h2 className="h-section mt-2">Choisissez un outil adapté à votre besoin.</h2>
         </div>
         <ol className="grid gap-4 sm:grid-cols-3">
           {[
-            {icon: 'tag', title: 'Pick a tool or a bundle', text: 'Each page shows exactly which files you get and which software they open in.'},
-            {icon: 'lock', title: 'Pay once with Shopify', text: 'Secure Shopify checkout. One payment, nothing renews.'},
-            {icon: 'download', title: 'Download and use', text: 'The download link appears right after payment and arrives by email.'},
+            {icon: 'tag', title: 'Choisissez un outil ou un pack', text: 'Chaque fiche précise les fichiers inclus et leurs formats.'},
+            {icon: 'lock', title: 'Réglez avec Shopify', text: 'Un paiement unique, sans abonnement.'},
+            {icon: 'download', title: 'Utilisez vos fichiers', text: 'Ouvrez le guide de démarrage inclus dans chaque archive.'},
           ].map((step, i) => (
             <li key={step.title} className="rounded-(--radius-control) bg-paper p-4">
               <span className="flex items-center gap-2 text-sm font-black">

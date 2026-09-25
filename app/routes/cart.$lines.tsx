@@ -1,5 +1,6 @@
 import {redirect} from 'react-router';
 import type {Route} from './+types/cart.$lines';
+import {getCatalog} from '~/lib/catalog';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.
@@ -20,6 +21,10 @@ import type {Route} from './+types/cart.$lines';
  * ```
  */
 export async function loader({request, context, params}: Route.LoaderArgs) {
+  const index = await getCatalog(context.env).getIndex();
+  if ((context.env as Env & {PUBLIC_CHECKOUT_ENABLED?: string}).PUBLIC_CHECKOUT_ENABLED !== 'true' || Object.keys(index).length !== 120) {
+    throw new Response('Paiement en attente de validation', {status: 503});
+  }
   const {cart} = context;
   const {lines} = params;
   if (!lines) return redirect('/cart');

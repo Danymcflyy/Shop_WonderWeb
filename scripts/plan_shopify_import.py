@@ -87,6 +87,7 @@ def main():
     if set(registry) != set(ids):
         raise ValueError('Registry IDs differ from publication manifest')
     handles = {p['factoryId']: p['proposedHandle'] for p in products}
+    bundles = [p for p in products if p['productType'] == 'bundle']
     snapshot = json.loads(args.snapshot.read_text()) if args.snapshot else None
     if snapshot is not None and not isinstance(snapshot, list):
         raise ValueError('Snapshot must be a JSON array')
@@ -179,6 +180,21 @@ def main():
             'Google Business Profile & Customer Reviews': ['local-shops'],
         }
         tier = 'bundle' if product['productType'] == 'bundle' else ('impulse' if registry[fid]['pricing_tier'] == 'micro' else 'core')
+        containing = sorted(
+            (b for b in bundles if fid in b['bundleProductIds']),
+            key=lambda b: (float(b['recommendedPriceTtcEur']), b['factoryId']),
+        )
+        related = []
+        for bundle in containing:
+            related.extend(part for part in bundle['bundleProductIds'] if part != fid and part not in related)
+        cross_sells = [
+            {'handle': handles[part], 'priority': position, 'reason': 'Outil complémentaire dans le même pack'}
+            for position, part in enumerate(related[:2], 1)
+        ]
+        offer = {'tier': tier, 'problemTags': [problem_tags[product['universe']]],
+                 'businessTags': business_tags.get(product['universe'], []), 'crossSells': cross_sells}
+        if containing:
+            offer['bundleUpgrade'] = {'handle': handles[containing[0]['factoryId']], 'headline': 'Voir le pack complet'}
         factory_data = {
             'universe': 'pro', 'tagline': subtitle, 'format': product['format'],
             'formats': sorted({item['format'] for item in included}),
@@ -187,8 +203,7 @@ def main():
             'outcome': {'headline': registry[fid]['expected_outcome'], 'points': benefits[:5] or [subtitle]},
             'included': included, 'howItWorks': steps, 'faq': faq,
             'preview': {'kind': 'bundle' if product['productType'] == 'bundle' else 'sheet' if 'xlsx' in {item['format'] for item in included} else 'doc'},
-            'offer': {'tier': tier, 'problemTags': [problem_tags[product['universe']]],
-                      'businessTags': business_tags.get(product['universe'], []), 'crossSells': []},
+            'offer': offer,
             'bundleItems': [handles[part] for part in product['bundleProductIds']] or None,
         }
         payloads.append({

@@ -17,7 +17,7 @@ export const meta: Route.MetaFunction = () => [
   {
     name: 'description',
     content:
-      'Calculators, planners, templates and bundles for your business and your everyday life. Instant download, editable files, one payment.',
+      'Calculateurs, modèles et packs pratiques pour votre activité. Fichiers modifiables, un seul paiement.',
   },
 ];
 
@@ -76,10 +76,10 @@ export default function Hub() {
         <div className="container-page py-8 lg:py-12">
           <p className="kicker">{SITE.name}</p>
           <h1 className="mt-3 max-w-3xl text-[36px] leading-[1.02] font-black tracking-[-0.03em] text-balance sm:text-[52px]">
-            Practical tools for work and life. <span className="marker">Pay once.</span>
+            Des outils concrets pour votre activité. <span className="marker">Un seul paiement.</span>
           </h1>
           <p className="mt-3 text-[15px] font-semibold text-ink/70">
-            {data.stats.tools} tools · {data.stats.bundles} bundles · from {formatMoney(data.stats.fromCents)}
+            {data.stats.tools} outils · {data.stats.bundles} packs · dès {formatMoney(data.stats.fromCents)}
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -110,7 +110,7 @@ export default function Hub() {
                           >
                             <span className="min-w-0 flex-1 text-[15px] leading-tight font-extrabold">{problem.label}</span>
                             <span className="shrink-0 text-xs text-muted">
-                              from <strong className="text-sm text-ink tabular-nums">{formatMoney(problem.fromCents)}</strong>
+                              dès <strong className="text-sm text-ink tabular-nums">{formatMoney(problem.fromCents)}</strong>
                             </span>
                             <Icon name="arrow" className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
                           </Link>
@@ -125,21 +125,21 @@ export default function Hub() {
                       >
                         <Icon name="layers" className="size-4 shrink-0" />
                         <span className="min-w-0 flex-1 truncate">
-                          <strong>{u.bundle.title}</strong> · {u.bundle.itemCount} tools
+                          <strong>{u.bundle.title}</strong> · {u.bundle.itemCount} outils
                         </span>
                         <span className="shrink-0 tabular-nums">
                           <strong>{formatMoney(u.bundle.priceCents)}</strong>{' '}
-                          <s className="text-muted">{formatMoney(u.bundle.separateCents)}</s>
+                          {u.bundle.savingsCents > 0 ? <s className="text-muted">{formatMoney(u.bundle.separateCents)}</s> : null}
                         </span>
                       </Link>
                     ) : null}
 
                     <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
                       <span className="text-sm font-semibold text-muted">
-                        {u.toolCount} tools · {u.bundleCount} bundles · from {formatMoney(u.fromCents)}
+                        {u.toolCount} outils · {u.bundleCount} packs · dès {formatMoney(u.fromCents)}
                       </span>
                       <Link to={config.path} prefetch="intent" className="btn-cta">
-                        Enter {config.label} <Icon name="arrow" />
+                        Explorer {config.label} <Icon name="arrow" />
                       </Link>
                     </div>
                   </div>
@@ -156,12 +156,12 @@ export default function Hub() {
 
       <section className="container-page py-12">
         <SectionHeading
-          kicker="Bundles"
-          title="Every bundle costs less than its tools bought separately."
-          intro="Savings are calculated from the tools’ current standalone prices."
+          kicker="Packs"
+          title="Des outils complémentaires, réunis dans un pack."
+          intro="Les économies éventuelles sont calculées avec les prix Shopify actuels."
           action={
             <Link to="/collections/bundles" className="btn-ghost">
-              All bundles <Icon name="arrow" />
+              Tous les packs <Icon name="arrow" />
             </Link>
           }
         />
@@ -173,7 +173,7 @@ export default function Hub() {
       <section id="faq" className="container-page grid gap-8 py-12 lg:grid-cols-[1fr_2fr]">
         <div>
           <p className="kicker">Questions</p>
-          <h2 className="h-section mt-2">Everything you need to know before buying.</h2>
+          <h2 className="h-section mt-2">Vos questions avant l’achat.</h2>
         </div>
         <FAQ items={GENERAL_FAQ} />
       </section>
@@ -181,8 +181,8 @@ export default function Hub() {
       <section className="container-page">
         <div className="card flex flex-col items-start justify-between gap-5 border-[1.5px] border-ink p-6 sm:flex-row sm:items-center sm:p-8">
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Pick your side. Fix one thing this week.</h2>
-            <p className="mt-1 text-ink/70">Instant download · Editable files · No subscription</p>
+            <h2 className="text-2xl font-black tracking-tight">Choisissez le problème à résoudre.</h2>
+            <p className="mt-1 text-ink/70">Outils numériques · Un paiement · Sans abonnement</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {UNIVERSES.map((u) => (

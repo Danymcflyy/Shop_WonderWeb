@@ -1,6 +1,30 @@
 import {MOCK_COLLECTIONS} from './mock-data';
 import {matchesFilter, sortProducts, type Catalog, type SortKey, toSummary} from './index';
-import type {BusinessTypeId, Product} from './types';
+import type {BusinessTypeId, CollectionDefinition, Product} from './types';
+
+const COLLECTION_COPY: Record<string, [string, string, string]> = {
+  'find-clients': ['Trouver des clients', 'Vos prospects ne donnent pas suite ?', 'Des outils pour structurer votre prospection et vos relances.'],
+  'make-more-profit': ['Améliorer sa marge', 'Votre activité est pleine, mais la marge reste floue ?', 'Des calculateurs pour clarifier vos prix et votre rentabilité.'],
+  'get-organized': ['Mieux s’organiser', 'Le suivi des clients et des tâches repose trop sur votre mémoire ?', 'Des modèles et processus pour organiser votre activité.'],
+  marketing: ['Créer du contenu', 'Vous manquez de méthode pour communiquer régulièrement ?', 'Des outils pour planifier et produire du contenu utile.'],
+  'local-business': ['Visibilité locale', 'Vos futurs clients ne vous trouvent pas facilement ?', 'Des outils pour améliorer votre présence locale.'],
+  artisans: ['Artisans', 'Devis, chantiers et suivi prennent trop de temps ?', 'Des outils adaptés au travail des artisans.'],
+  freelancers: ['Indépendants', 'Vous gérez seul la mission et l’entreprise ?', 'Des outils pour les prix, les clients et l’organisation.'],
+  agencies: ['Agences', 'Le suivi des missions et des marges devient complexe ?', 'Des outils pour piloter une petite agence.'],
+  ecommerce: ['E-commerce', 'Le chiffre d’affaires ne dit pas tout de votre rentabilité.', 'Des outils pour suivre marge et conversion.'],
+  'local-shops': ['Commerces locaux', 'La visibilité locale compte pour votre activité.', 'Des outils pour votre fiche, vos avis et votre contenu.'],
+  'pro-bundles': ['Packs', 'Vous avez besoin de plusieurs outils coordonnés ?', 'Des packs réunissant des produits complémentaires.'],
+  'pro-all': ['Tous les outils', 'Choisissez le problème à résoudre.', 'Parcourez les outils numériques WonderWeb.'],
+  bundles: ['Tous les packs', 'Plusieurs outils pour un même objectif.', 'Parcourez les packs WonderWeb.'],
+  all: ['Tous les outils', 'Choisissez le problème à résoudre.', 'Parcourez les outils numériques WonderWeb.'],
+};
+
+const SHOPIFY_COLLECTIONS: CollectionDefinition[] = MOCK_COLLECTIONS
+  .filter(c => c.universe === 'pro' || c.handle === 'all' || c.handle === 'bundles')
+  .map(c => {
+    const [title, problem, outcome] = COLLECTION_COPY[c.handle];
+    return {...c, title, problem, outcome, bundleHandle: undefined};
+  });
 
 // Only products carrying both factory metafields enter the public catalogue.
 // The import creates these metafields on a DRAFT product first; Shopify makes
@@ -103,12 +127,12 @@ export function createShopifyCatalog(env: Env): Catalog {
     async getProduct(handle) { return (await load()).find(p => p.handle === handle) ?? null; },
     async getIndex() { return Object.fromEntries((await load()).map(p => [p.handle, toSummary(p)])); },
     async getCollection(handle, {sort = 'recommended', business = null}: {sort?: SortKey; business?: BusinessTypeId | null} = {}) {
-      const collection = MOCK_COLLECTIONS.find(c => c.handle === handle);
+      const collection = SHOPIFY_COLLECTIONS.find(c => c.handle === handle);
       if (!collection) return null;
       const summaries = (await load()).map(toSummary).filter(p => matchesFilter(p, collection.filter) && (!business || p.businessTags.includes(business)));
       return {collection, products: sortProducts(summaries, sort)};
     },
-    async listCollections(kind) { return kind ? MOCK_COLLECTIONS.filter(c => c.kind === kind) : MOCK_COLLECTIONS; },
+    async listCollections(kind) { return kind ? SHOPIFY_COLLECTIONS.filter(c => c.kind === kind) : SHOPIFY_COLLECTIONS; },
     async getCampaigns() { return []; },
   };
 }

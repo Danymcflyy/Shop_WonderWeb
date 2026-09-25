@@ -8,7 +8,7 @@ import type {UniverseId} from '~/lib/catalog/types';
 
 export const SITE = {
   name: 'WonderWeb',
-  promise: 'Practical tools for work and life. One payment. No subscription.',
+  promise: 'Des outils concrets pour votre activité. Un paiement, sans abonnement.',
   currency: 'EUR',
 } as const;
 
@@ -44,65 +44,40 @@ export const UNIVERSES: UniverseConfig[] = [
     id: 'pro',
     label: 'Pro',
     path: '/pro',
-    pitch: 'Business tools for trades, freelancers and small businesses.',
-    audience: 'For trades, freelancers & small businesses',
-    hero: {title: 'Fix one business problem today.', highlight: 'Pay once.'},
+    pitch: 'Des outils pour indépendants, artisans et petites entreprises.',
+    audience: 'Pour les indépendants, artisans et PME',
+    hero: {title: 'Résolvez un problème concret aujourd’hui.', highlight: 'Un seul paiement.'},
     nav: [
-      {label: 'Find clients', to: '/collections/find-clients'},
-      {label: 'Make more profit', to: '/collections/make-more-profit'},
-      {label: 'Get organized', to: '/collections/get-organized'},
+      {label: 'Trouver des clients', to: '/collections/find-clients'},
+      {label: 'Améliorer sa marge', to: '/collections/make-more-profit'},
+      {label: 'S’organiser', to: '/collections/get-organized'},
       {label: 'Marketing', to: '/collections/marketing'},
-      {label: 'Local business', to: '/collections/local-business'},
+      {label: 'Visibilité locale', to: '/collections/local-business'},
       {
-        label: 'By business type',
+        label: 'Par métier',
         to: '/collections/artisans',
         children: [
-          {label: 'Artisans & trades', to: '/collections/artisans'},
-          {label: 'Freelancers', to: '/collections/freelancers'},
-          {label: 'Small agencies', to: '/collections/agencies'},
+          {label: 'Artisans', to: '/collections/artisans'},
+          {label: 'Indépendants', to: '/collections/freelancers'},
+          {label: 'Agences', to: '/collections/agencies'},
           {label: 'E-commerce', to: '/collections/ecommerce'},
-          {label: 'Local shops & studios', to: '/collections/local-shops'},
+          {label: 'Commerces locaux', to: '/collections/local-shops'},
         ],
       },
-      {label: 'Bundles', to: '/collections/pro-bundles'},
-      {label: 'All Pro tools', to: '/collections/pro-all'},
+      {label: 'Packs', to: '/collections/pro-bundles'},
+      {label: 'Tous les outils', to: '/collections/pro-all'},
     ],
     problems: [
-      {collection: 'make-more-profit', label: 'Know my real rate and margin', hint: 'Rate, margin and cash-flow calculators'},
-      {collection: 'find-clients', label: 'Win more of my quotes and leads', hint: 'Follow-up scripts and a simple pipeline'},
-      {collection: 'get-organized', label: 'Stop running the business from my head', hint: 'Planners, onboarding and templates'},
-      {collection: 'local-business', label: 'Get found by clients nearby', hint: 'Google profile, reviews, local SEO'},
-      {collection: 'marketing', label: 'Post regularly and convert visitors', hint: 'Content calendar and page checklists'},
+      {collection: 'make-more-profit', label: 'Connaître ma vraie marge', hint: 'Prix, marge et rentabilité'},
+      {collection: 'find-clients', label: 'Trouver et relancer des clients', hint: 'Prospection et suivi commercial'},
+      {collection: 'get-organized', label: 'Mieux organiser mon activité', hint: 'Processus, modèles et suivi'},
+      {collection: 'local-business', label: 'Être trouvé près de chez moi', hint: 'Fiche Google, avis et visibilité'},
+      {collection: 'marketing', label: 'Créer du contenu utile', hint: 'Calendriers et modèles de contenu'},
     ],
     bundlesPath: '/collections/pro-bundles',
     allPath: '/collections/pro-all',
-    heroBundle: 'artisan-business-toolkit',
-    spotlightBundle: 'freelance-operating-system',
+    heroBundle: 'acquisition-toolkit-p12',
     businessTypes: true,
-  },
-  {
-    id: 'lifestyle',
-    label: 'Lifestyle',
-    path: '/lifestyle',
-    pitch: 'Planners and trackers for your money, your home and your habits.',
-    audience: 'For households, families & busy people',
-    hero: {title: 'Get your home and money in order.', highlight: 'Pay once.'},
-    nav: [
-      {label: 'Budget & money', to: '/collections/money'},
-      {label: 'Organised home', to: '/collections/home'},
-      {label: 'Habits & wellbeing', to: '/collections/wellbeing'},
-      {label: 'Bundles', to: '/collections/lifestyle-bundles'},
-      {label: 'All Lifestyle tools', to: '/collections/lifestyle-all'},
-    ],
-    problems: [
-      {collection: 'money', label: 'Know where my money goes', hint: 'Budget, debt and savings planners'},
-      {collection: 'home', label: 'Run the house without the mental load', hint: 'Meals, chores and decluttering'},
-      {collection: 'wellbeing', label: 'Build habits that actually stick', hint: 'Habit and routine trackers'},
-    ],
-    bundlesPath: '/collections/lifestyle-bundles',
-    allPath: '/collections/lifestyle-all',
-    heroBundle: 'organised-home-bundle',
-    businessTypes: false,
   },
 ];
 
@@ -111,10 +86,10 @@ export function getUniverse(id: string | null | undefined) {
 }
 
 export const TRUST_ITEMS = [
-  {icon: 'download', label: 'Instant download'},
-  {icon: 'receipt', label: 'One payment, no subscription'},
-  {icon: 'edit', label: 'Editable files'},
-  {icon: 'lock', label: 'Secure Shopify checkout'},
+  {icon: 'download', label: 'Fichiers numériques'},
+  {icon: 'receipt', label: 'Un paiement, sans abonnement'},
+  {icon: 'edit', label: 'Formats indiqués sur chaque fiche'},
+  {icon: 'lock', label: 'Paiement Shopify sécurisé'},
 ] as const;
 
 export const FORMAT_LABELS: Record<string, string> = {
@@ -126,30 +101,22 @@ export const FORMAT_LABELS: Record<string, string> = {
   canva: 'Canva',
 };
 
-/** Store-wide FAQ. OWNER TO CONFIRM: delivery, invoice, licence, file-issue policy. */
+/** Store-wide FAQ. Claims requiring operational verification stay out until QA. */
 export const GENERAL_FAQ: Array<{q: string; a: string}> = [
   {
-    q: 'How do I get the files?',
-    a: 'Right after payment you get a download link on the order confirmation page and by email. No account needed.',
+    q: 'Quels fichiers vais-je recevoir ?',
+    a: 'La liste des fichiers et des formats figure sur chaque fiche produit.',
   },
   {
-    q: 'Is this a subscription?',
-    a: 'No. You pay once and keep the files. Nothing renews.',
+    q: 'S’agit-il d’un abonnement ?',
+    a: 'Non. Chaque outil est vendu avec un paiement unique.',
   },
   {
-    q: 'Which software do I need?',
-    a: 'Each product lists its exact formats. Most tools work in Excel or free Google Sheets; documents open in Word or Google Docs.',
+    q: 'De quel logiciel ai-je besoin ?',
+    a: 'Les formats PDF et Excel sont précisés sur chaque fiche. Vérifiez la compatibilité indiquée avant l’achat.',
   },
   {
-    q: 'Can I get a VAT invoice?',
-    a: 'Yes. Enter your company name and VAT number at checkout and the invoice is sent with your order.',
-  },
-  {
-    q: 'What if a file doesn’t work?',
-    a: 'Contact us within 14 days of purchase. We fix the file or refund you. Because the files are delivered instantly, we can’t refund a download that works as described.',
-  },
-  {
-    q: 'Can my team or family use it?',
-    a: 'Yes — one purchase covers one business or one household. Reselling or sharing outside it isn’t allowed.',
+    q: 'Où trouver les conditions d’utilisation ?',
+    a: 'La licence est incluse dans l’archive de chaque produit.',
   },
 ];

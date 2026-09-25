@@ -25,6 +25,7 @@ export type FunnelEvent =
   | 'progress_offer_view'
   | 'progress_offer_unlock'
   | 'begin_checkout'
+  | 'checkout_blocked'
   | 'purchase'
   | 'view_promo'
   | 'use_promo'

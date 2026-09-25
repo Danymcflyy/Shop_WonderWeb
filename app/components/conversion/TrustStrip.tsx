@@ -15,8 +15,8 @@ export function TrustStrip({compact = false}: {compact?: boolean}) {
       {TRUST_ITEMS.map((item) => (
         <li key={item.label} className="flex items-center gap-1.5">
           <Icon name={item.icon} className="size-4 shrink-0 text-success" />
-          {!checkoutEnabled && item.label === 'Secure Shopify checkout'
-            ? 'Shopify checkout setup pending'
+          {!checkoutEnabled && item.label === 'Paiement Shopify sécurisé'
+            ? 'Paiement en cours de configuration'
             : item.label}
         </li>
       ))}
