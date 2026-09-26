@@ -40,8 +40,6 @@ export function SiteFooter() {
           title="Aide"
           links={[
             {label: 'Livraison et formats', to: '/#faq'},
-            {label: 'Politique de remboursement', to: '/policies/refund-policy'},
-            {label: 'Conditions de vente', to: '/policies/terms-of-service'},
             {label: 'Politique de confidentialité', to: '/policies/privacy-policy'},
           ]}
         />
