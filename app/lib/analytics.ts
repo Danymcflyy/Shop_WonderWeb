@@ -6,7 +6,9 @@
  * endpoint) can subscribe later without touching components.
  */
 import {useEffect, useRef} from 'react';
+import {useLocation} from 'react-router';
 import type {ProductSummary} from '~/lib/catalog/types';
+import {readInterests} from '~/lib/personalization';
 
 export type FunnelEvent =
   | 'page_view'
@@ -23,6 +25,7 @@ export type FunnelEvent =
   | 'progress_offer_view'
   | 'progress_offer_unlock'
   | 'begin_checkout'
+  | 'checkout_blocked'
   | 'purchase'
   | 'view_promo'
   | 'use_promo'
@@ -71,6 +74,22 @@ export function track(event: FunnelEvent, payload: EventPayload = {}) {
   window.dispatchEvent(new CustomEvent('storefront:analytics', {detail: entry}));
   // eslint-disable-next-line no-console
   if (import.meta.env.DEV) console.debug('[analytics]', event, payload);
+}
+
+/** Tracks client-side route changes with the current first-party interest profile. */
+export function RouteAnalytics() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const interests = readInterests();
+    track('page_view', {
+      page_path: `${location.pathname}${location.search}`,
+      page_title: document.title,
+      interest_tags: Object.keys(interests).filter((tag) => interests[tag] > 0),
+    });
+  }, [location.pathname, location.search]);
+
+  return null;
 }
 
 /** Fires once per mount, when the element is at least half visible. */

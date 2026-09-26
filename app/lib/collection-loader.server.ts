@@ -13,5 +13,5 @@ export async function loadCollection(handle: string, request: Request, env: Env)
 
   const result = await getCatalog(env).getCollection(handle, {sort, business});
   if (!result) throw data({message: `Collection ${handle} not found`}, {status: 404});
-  return {...result, sort, business};
+  return {...result, sort, business, universe: result.collection.universe ?? null};
 }

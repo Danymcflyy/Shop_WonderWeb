@@ -46,6 +46,20 @@
   }
 }
 
+/*
+ * Universe accents. Any element with data-universe (the page shell, a hub
+ * card, a bundle card) swaps the CTA colour; everything else stays shared.
+ * Ink text on both accents passes WCAG AA.
+ */
+[data-universe='pro'] {
+  --color-cta: #ff5a1f;
+  --color-cta-hover: #e94b12;
+}
+[data-universe='lifestyle'] {
+  --color-cta: #14b8a6;
+  --color-cta-hover: #0f9e8e;
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

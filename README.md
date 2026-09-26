@@ -25,7 +25,57 @@ npm run lint
 | `app/components/cart/` | Cart provider + drawer |
 | `app/styles/tailwind.css` | Design tokens — change the brand here only |
 
-## Mock mode (current)
+## Catalogue and publication gate
+
+With Storefront credentials, `getCatalog()` reads Shopify products carrying
+`custom.factory_id` and `custom.factory_data`. Products without nine Shopify
+images, an available EUR variant, or these metafields are omitted. The server
+renders a prelaunch state while that catalogue is empty. Checkout remains
+closed until `PUBLIC_CHECKOUT_ENABLED=true` is set after payment and digital
+delivery QA; the cart uses Shopify's `/cart` action and its `checkoutUrl`.
+
+Prepare a private, read-only import plan and a visual review from the factory:
+
+```bash
+python3 scripts/plan_shopify_import.py \
+  --factory /path/to/digital-product-factory \
+  --manifest publication/shopify-publication-manifest.json
+```
+
+The generated `publication/preview/` is ignored by Git. Its CSV records the
+120 correspondences and verification status. Without a current Admin snapshot,
+every row is `needs_admin_lookup`; no creation is assumed. Passing
+`--snapshot admin-products.json` classifies draft creates, updates and
+conflicts by `custom.factory_id` and handle.
+
+After authenticating Shopify CLI for the intended store with product and file
+read/write scopes, create the two `custom` product metafield definitions with
+Storefront `PUBLIC_READ` access using `admin-metafield-definition-create.graphql`.
+The draft importer checks those definitions, the exact store, EUR currency,
+tax-inclusive prices, duplicate IDs and conflicting handles before writing.
+It stages the nine real images per product and creates only `DRAFT` products.
+Rerunning skips existing matching drafts instead of duplicating them:
+
+```bash
+python3 scripts/import_shopify_drafts.py \
+  --store your-store.myshopify.com \
+  --factory /path/to/digital-product-factory
+python3 scripts/verify_shopify_drafts.py \
+  --store your-store.myshopify.com \
+  --factory /path/to/digital-product-factory
+```
+
+The verification report and ZIP-to-variant attachment list are written only
+under the ignored `publication/preview/` directory. A changed existing draft
+is reported by verification for review; the importer does not silently replace
+it or change an active product.
+
+The ZIP archives must be attached through a protected post-payment delivery
+solution. Shopify's free Digital Products app supports ZIP assets and automatic
+delivery after payment. This attachment and the real purchase test are still
+required before enabling checkout or publishing any draft.
+
+## Mock mode (without Storefront credentials)
 
 Products, bundles and the "3 tools → 20%" campaign come from `app/lib/catalog/mock-data.ts`.
 Because mock products have no Shopify variant IDs, the cart is client-side (localStorage) and checkout shows a development notice.
@@ -33,9 +83,10 @@ Product visuals are placeholder sketches visibly tagged **Placeholder preview**,
 
 Guard: a campaign with `discountSource: 'mock'` is never displayed once the catalogue source is Shopify.
 
-## Shopify data mapping (next step)
+## Shopify data mapping
 
-Implement a Storefront API `Catalog` in `app/lib/catalog/` and return it from `getCatalog()`:
+The Storefront API adapter in `app/lib/catalog/` reads Shopify price, image,
+variant ID, handle and factory metafields:
 
 | `Product` field | Shopify source |
 | --- | --- |
@@ -48,5 +99,5 @@ Implement a Storefront API `Catalog` in `app/lib/catalog/` and return it from `g
 | offer.bundleUpgrade, bundleItems | product reference / list of product references |
 | salesRank | computed from real orders (never editorial) |
 
-Then swap `CartProvider` persistence to Hydrogen's `context.cart` (the `/cart` action is already in place) and redirect checkout to `cart.checkoutUrl`.
-The "3 tools → 20%" rule must exist as a Shopify automatic discount before its `discountSource` is switched to `shopify-automatic`.
+The "3 tools → 20%" rule must exist as a verified Shopify automatic discount
+before its `discountSource` is switched to `shopify-automatic`.

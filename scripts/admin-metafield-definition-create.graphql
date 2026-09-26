@@ -1,0 +1,6 @@
+mutation FactoryMetafieldDefinitionCreate($definition: MetafieldDefinitionInput!) {
+  metafieldDefinitionCreate(definition: $definition) {
+    createdDefinition { id namespace key type { name } access { storefront } }
+    userErrors { field message code }
+  }
+}

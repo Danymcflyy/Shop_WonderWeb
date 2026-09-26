@@ -1,13 +1,15 @@
 import {useEffect, useRef, useState} from 'react';
 import {Link, NavLink, useLocation} from 'react-router';
-import {MAIN_NAV, SITE, type NavItem} from '~/lib/site';
+import {SITE, UNIVERSES, type NavItem, type UniverseConfig} from '~/lib/site';
+import {useCurrentUniverse} from '~/lib/use-universe';
 import {formatMoney} from '~/lib/money';
 import {useCart} from '~/components/cart/CartProvider';
 import {Icon} from '~/components/ui/Icon';
 
 export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
+  const universe = useCurrentUniverse();
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/97 backdrop-blur-sm">
+    <header className="site-header sticky top-0 z-30 border-b border-line bg-surface/97 backdrop-blur-sm">
       <div className="container-page flex h-16 items-center gap-3">
         <button
           type="button"
@@ -25,18 +27,24 @@ export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
           <span className="text-lg font-black tracking-tight">{SITE.name}</span>
         </Link>
 
-        <p className="ml-3 hidden text-[13px] font-semibold text-muted xl:block">{SITE.promise}</p>
+        <div className="ml-2 hidden lg:block">
+          <UniverseSwitcher current={universe} />
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <Link to="/collections/bundles" prefetch="intent" className="btn-ghost hidden sm:inline-flex">
+          <Link
+            to={universe?.bundlesPath ?? '/collections/bundles'}
+            prefetch="intent"
+            className="btn-ghost hidden sm:inline-flex"
+          >
             Save with bundles
           </Link>
           <CartButton />
         </div>
       </div>
 
-      <DesktopNav />
-      <MobileCategoryRail />
+      {universe ? <DesktopNav universe={universe} /> : null}
+      <MobileCategoryRail universe={universe} />
     </header>
   );
 }
@@ -77,11 +85,11 @@ function CartButton() {
 const navLinkClass = ({isActive}: {isActive: boolean}) =>
   `relative whitespace-nowrap py-3 text-sm font-bold transition-colors hover:text-ink ${isActive ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-cta' : 'text-ink/70'}`;
 
-function DesktopNav() {
+function DesktopNav({universe}: {universe: UniverseConfig}) {
   return (
     <nav aria-label="Main" className="hidden border-t border-line lg:block">
       <ul className="container-page flex items-center gap-6">
-        {MAIN_NAV.map((item) => (
+        {universe.nav.map((item) => (
           <li key={item.label}>
             {item.children ? <NavDropdown item={item} /> : (
               <NavLink to={item.to} prefetch="intent" className={navLinkClass}>
@@ -147,12 +155,16 @@ function NavDropdown({item}: {item: NavItem}) {
   );
 }
 
-/** Mobile: problem navigation stays one swipe away, no menu needed. */
-function MobileCategoryRail() {
-  const items = MAIN_NAV.filter((item) => !item.children);
+/** Mobile: universe switch + problem navigation, one swipe away. */
+function MobileCategoryRail({universe}: {universe: UniverseConfig | null}) {
+  const items = (universe?.nav ?? []).filter((item) => !item.children);
   return (
     <nav aria-label="Categories" className="border-t border-line lg:hidden">
-      <ul className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
+      <ul className="flex items-center gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
+        <li className="shrink-0">
+          <UniverseSwitcher current={universe} />
+        </li>
+        {items.length ? <li aria-hidden className="h-5 w-px shrink-0 bg-line" /> : null}
         {items.map((item) => (
           <li key={item.to} className="shrink-0">
             <NavLink
@@ -168,5 +180,30 @@ function MobileCategoryRail() {
         ))}
       </ul>
     </nav>
+  );
+}
+
+/** Segmented control between universes. Each option carries its own accent. */
+function UniverseSwitcher({current}: {current: UniverseConfig | null}) {
+  return (
+    <div className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-paper p-1">
+      {UNIVERSES.map((universe) => {
+        const active = current?.id === universe.id;
+        return (
+          <Link
+            key={universe.id}
+            to={universe.path}
+            prefetch="intent"
+            data-universe={universe.id}
+            aria-current={active ? 'page' : undefined}
+            className={`rounded-full px-3 py-1 text-[13px] font-extrabold whitespace-nowrap transition-colors ${
+              active ? 'bg-ink text-surface' : 'text-ink/70 hover:bg-cta hover:text-ink'
+            }`}
+          >
+            {universe.label}
+          </Link>
+        );
+      })}
+    </div>
   );
 }

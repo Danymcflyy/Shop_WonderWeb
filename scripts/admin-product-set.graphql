@@ -1,0 +1,11 @@
+mutation FactoryProductSet($input: ProductSetInput!, $identifier: ProductSetIdentifiers) {
+  productSet(input: $input, identifier: $identifier, synchronous: true) {
+    product {
+      id handle status
+      variants(first: 1) { nodes { id price inventoryItem { requiresShipping } } }
+      media(first: 9) { nodes { id alt mediaContentType status } }
+      factoryId: metafield(namespace: "custom", key: "factory_id") { value }
+    }
+    userErrors { field message code }
+  }
+}

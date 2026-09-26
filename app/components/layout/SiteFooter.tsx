@@ -1,11 +1,8 @@
 import {Link} from 'react-router';
-import {MAIN_NAV, SITE} from '~/lib/site';
+import {SITE, UNIVERSES} from '~/lib/site';
 import {TrustStrip} from '~/components/conversion/TrustStrip';
 
 export function SiteFooter() {
-  const problems = MAIN_NAV.filter((item) => !item.children);
-  const business = MAIN_NAV.find((item) => item.children)?.children ?? [];
-
   return (
     <footer className="mt-16 border-t border-line bg-surface">
       <div className="container-page border-b border-line py-5">
@@ -14,12 +11,31 @@ export function SiteFooter() {
       <div className="container-page grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="text-lg font-black">{SITE.name}</p>
-          <p className="mt-2 max-w-xs text-sm text-ink/70">
-            Practical tools for small businesses and independent professionals. {SITE.promise}
-          </p>
+          <p className="mt-2 max-w-xs text-sm text-ink/70">{SITE.promise}</p>
+          <ul className="mt-4 space-y-1.5">
+            {UNIVERSES.map((universe) => (
+              <li key={universe.id} data-universe={universe.id}>
+                <Link
+                  to={universe.path}
+                  prefetch="intent"
+                  className="inline-flex items-center gap-2 text-sm font-extrabold hover:underline"
+                >
+                  <span aria-hidden className="size-2.5 bg-cta" />
+                  WonderWeb {universe.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <FooterColumn title="Shop by problem" links={problems.map((i) => ({label: i.label, to: i.to}))} />
-        <FooterColumn title="By business type" links={business.map((i) => ({label: i.label, to: i.to}))} />
+        {UNIVERSES.map((universe) => (
+          <FooterColumn
+            key={universe.id}
+            title={`${universe.label} — shop by problem`}
+            links={universe.nav
+              .filter((item) => !item.children)
+              .map((item) => ({label: item.label, to: item.to}))}
+          />
+        ))}
         <FooterColumn
           title="Help"
           links={[

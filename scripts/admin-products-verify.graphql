@@ -1,0 +1,15 @@
+query FactoryProductsVerify($cursor: String) {
+  products(first: 20, after: $cursor) {
+    pageInfo { hasNextPage endCursor }
+    nodes {
+      id handle title status productType vendor
+      seo { title description }
+      factoryId: metafield(namespace: "custom", key: "factory_id") { value }
+      factoryData: metafield(namespace: "custom", key: "factory_data") { value }
+      variants(first: 1) {
+        nodes { id price sku taxable inventoryItem { requiresShipping tracked } }
+      }
+      media(first: 10) { nodes { id alt mediaContentType status } }
+    }
+  }
+}

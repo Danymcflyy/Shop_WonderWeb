@@ -1,12 +1,4 @@
-/**
- * Cart state for the Golden Path.
- *
- * While the catalogue is mock data, the cart lives in localStorage: mock
- * products have no Shopify variant IDs, so Storefront API cart mutations
- * can't accept them. All commercial rules live in ~/lib/offer-engine, so
- * swapping persistence for Hydrogen's CartForm/`context.cart` later changes
- * this file only.
- */
+/** Shopify carts use Hydrogen actions; local mock catalogues use localStorage. */
 import {
   createContext,
   useCallback,
@@ -17,6 +9,8 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {useFetcher} from 'react-router';
+import {CartForm} from '@shopify/hydrogen';
 import type {Campaign, CatalogIndex} from '~/lib/catalog/types';
 import {
   addToCartLines,
@@ -31,6 +25,12 @@ import {
 import {productDimensions, track} from '~/lib/analytics';
 
 const STORAGE_KEY = 'tb:cart:v1';
+
+type ShopifyCart = {
+  checkoutUrl: string;
+  lines: {nodes: Array<{id: string; merchandise?: {product?: {handle: string}}}>};
+  cost?: {subtotalAmount?: {amount: string}; totalAmount?: {amount: string}};
+};
 
 export type AddPlacement =
   | 'pdp_hero'
@@ -48,9 +48,12 @@ type CartContextValue = {
   lines: CartLines;
   /** False until localStorage has been read, to avoid flashing an empty cart. */
   ready: boolean;
+  busy: boolean;
+  checkoutUrl: string | null;
   index: CatalogIndex;
   campaign: Campaign | null;
   catalogSource: 'mock' | 'shopify';
+  checkoutEnabled: boolean;
   totals: CartTotals;
   upgrade: BundleUpgradeOffer | null;
   notice: CartNotice;
@@ -80,32 +83,77 @@ export function CartProvider({
   index,
   campaign,
   catalogSource,
+  checkoutEnabled,
 }: {
   children: ReactNode;
   index: CatalogIndex;
   campaign: Campaign | null;
   catalogSource: 'mock' | 'shopify';
+  checkoutEnabled: boolean;
 }) {
   const [lines, setLines] = useState<CartLines>([]);
   const [ready, setReady] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [lineIds, setLineIds] = useState<Record<string, string>>({});
+  const fetcher = useFetcher<{cart?: ShopifyCart | null; errors?: unknown} | ShopifyCart | null>();
+  const busy = catalogSource === 'shopify' && fetcher.state !== 'idle';
+  const loadCart = fetcher.load;
   const [isOpen, setIsOpen] = useState(false);
   const [notice, setNotice] = useState<CartNotice>(null);
   const linesRef = useRef(lines);
+  const pendingRef = useRef<{kind: 'add' | 'remove'; handle: string; placement?: AddPlacement; replaced?: string[]} | null>(null);
   linesRef.current = lines;
 
   useEffect(() => {
-    setLines(readStoredLines(index));
-    setReady(true);
-  }, [index]);
+    if (catalogSource === 'shopify') {
+      void loadCart('/cart');
+    } else {
+      setLines(readStoredLines(index));
+      setReady(true);
+    }
+  }, [catalogSource, index, loadCart]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (catalogSource !== 'shopify' || fetcher.data === undefined) return;
+    const hasErrors = Boolean(fetcher.data && 'errors' in fetcher.data && (Array.isArray(fetcher.data.errors) ? fetcher.data.errors.length > 0 : fetcher.data.errors));
+    const cart = fetcher.data && 'lines' in fetcher.data ? fetcher.data as ShopifyCart : fetcher.data?.cart;
+    const nodes = cart?.lines?.nodes ?? [];
+    if (cart) {
+      setLines(nodes.map(node => node.merchandise?.product?.handle).filter((handle): handle is string => !!handle && !!index[handle]));
+      setLineIds(Object.fromEntries(nodes.map(node => [node.merchandise?.product?.handle, node.id]).filter((pair): pair is [string, string] => !!pair[0])));
+    }
+    setCheckoutUrl(hasErrors ? null : cart?.checkoutUrl || null);
+    setReady(true);
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (hasErrors || (pending && !cart)) {
+      setNotice({tone: 'info', message: 'Le panier Shopify n’a pas confirmé cette modification. Vérifiez son contenu avant de continuer.'});
+    } else if (pending?.kind === 'add') {
+      const product = index[pending.handle];
+      const replacedTitles = pending.replaced?.map(h => index[h]?.title).filter(Boolean) ?? [];
+      setNotice({tone: 'success', message: replacedTitles.length
+        ? `${product.title} ajouté. ${replacedTitles.join(' et ')} ${replacedTitles.length > 1 ? 'ont été retirés' : 'a été retiré'} du panier pour éviter un double achat.`
+        : `${product.title} ajouté au panier.`});
+      const dims = {...productDimensions(product), placement: pending.placement};
+      if (pending.placement === 'cart_cross_sell') track('add_cross_sell', dims);
+      else if (pending.placement === 'cart_bundle_upgrade' || pending.placement === 'pdp_bundle') {
+        track('accept_bundle_upgrade', {...dims, bundle_id: product.factoryId, replaced: pending.replaced ?? []});
+      }
+      track('add_to_cart', dims);
+    } else if (pending?.kind === 'remove' && index[pending.handle]) {
+      track('remove_from_cart', productDimensions(index[pending.handle]));
+      setNotice(null);
+    }
+  }, [catalogSource, fetcher.data, index]);
+
+  useEffect(() => {
+    if (!ready || catalogSource === 'shopify') return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
     } catch {
       // Storage unavailable: cart still works for this page view.
     }
-  }, [lines, ready]);
+  }, [lines, ready, catalogSource]);
 
   const totals = useMemo(() => getCartTotals(lines, index, campaign), [lines, index, campaign]);
   const upgrade = useMemo(
@@ -140,8 +188,29 @@ export function CartProvider({
 
   const add = useCallback(
     (handle: string, placement: AddPlacement) => {
+      if (!ready || busy) return {status: 'unknown', lines: linesRef.current, replaced: []} as AddResult;
       const result = addToCartLines(linesRef.current, handle, index);
       const product = index[handle];
+
+      if (result.status === 'added' && catalogSource === 'shopify') {
+        if (!product.variantId) {
+          setNotice({tone: 'info', message: 'Cette fiche ne peut pas encore être ajoutée au panier Shopify.'});
+          return {status: 'unknown', lines: linesRef.current, replaced: []} as AddResult;
+        }
+        pendingRef.current = {kind: 'add', handle, placement, replaced: result.replaced};
+        void fetcher.submit(
+          {cartFormInput: JSON.stringify({
+            action: 'CustomFactoryReplace',
+            inputs: {
+              removeLineIds: result.replaced.map(h => lineIds[h]).filter(Boolean),
+              lines: [{merchandiseId: product.variantId, quantity: 1}],
+            },
+          })},
+          {method: 'POST', action: '/cart'},
+        );
+        setIsOpen(true);
+        return result;
+      }
 
       if (result.status === 'added') {
         setLines(result.lines);
@@ -149,8 +218,8 @@ export function CartProvider({
         setNotice({
           tone: 'success',
           message: replacedTitles.length
-            ? `${product.title} added. It includes ${replacedTitles.join(' and ')}, so ${replacedTitles.length > 1 ? 'they were' : 'it was'} removed — you won’t pay twice.`
-            : `${product.title} added to your cart.`,
+            ? `${product.title} ajouté. ${replacedTitles.join(' et ')} ${replacedTitles.length > 1 ? 'ont été retirés' : 'a été retiré'} du panier pour éviter un double achat.`
+            : `${product.title} ajouté au panier.`,
         });
 
         const dims = {...productDimensions(product), placement};
@@ -160,34 +229,46 @@ export function CartProvider({
         }
         track('add_to_cart', dims);
       } else if (result.status === 'covered-by-bundle') {
-        setNotice({tone: 'info', message: `${product.title} is already included in a bundle in your cart.`});
+        setNotice({tone: 'info', message: `${product.title} est déjà inclus dans un pack de votre panier.`});
       } else if (result.status === 'already-in-cart') {
-        setNotice({tone: 'info', message: `${product.title} is already in your cart.`});
+        setNotice({tone: 'info', message: `${product.title} est déjà dans votre panier.`});
       }
 
       setIsOpen(true);
       return result;
     },
-    [index],
+    [index, ready, busy, catalogSource, fetcher, lineIds],
   );
 
   const remove = useCallback(
     (handle: string) => {
+      if (!ready || busy) return;
+      if (catalogSource === 'shopify' && lineIds[handle]) {
+        pendingRef.current = {kind: 'remove', handle};
+        void fetcher.submit(
+          {cartFormInput: JSON.stringify({action: CartForm.ACTIONS.LinesRemove, inputs: {lineIds: [lineIds[handle]]}})},
+          {method: 'POST', action: '/cart'},
+        );
+        return;
+      }
       setLines((current) => removeFromCartLines(current, handle));
       setNotice(null);
       const product = index[handle];
       if (product) track('remove_from_cart', productDimensions(product));
     },
-    [index],
+    [index, ready, busy, catalogSource, lineIds, fetcher],
   );
 
   const value = useMemo<CartContextValue>(
     () => ({
       lines,
       ready,
+      busy,
+      checkoutUrl,
       index,
       campaign,
       catalogSource,
+      checkoutEnabled,
       totals,
       upgrade,
       notice,
@@ -197,7 +278,7 @@ export function CartProvider({
       open,
       close,
     }),
-    [lines, ready, index, campaign, catalogSource, totals, upgrade, notice, isOpen, add, remove, open, close],
+    [lines, ready, busy, checkoutUrl, index, campaign, catalogSource, checkoutEnabled, totals, upgrade, notice, isOpen, add, remove, open, close],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

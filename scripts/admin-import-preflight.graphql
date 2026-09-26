@@ -1,0 +1,6 @@
+query FactoryImportPreflight {
+  shop { myshopifyDomain currencyCode taxesIncluded }
+  metafieldDefinitions(first: 20, ownerType: PRODUCT, namespace: "custom") {
+    nodes { key type { name } access { storefront } }
+  }
+}

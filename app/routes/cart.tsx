@@ -30,6 +30,27 @@ export async function action({request, context}: Route.ActionArgs) {
     case CartForm.ACTIONS.LinesAdd:
       result = await cart.addLines(inputs.lines);
       break;
+    case 'CustomFactoryReplace': {
+      const removeLineIds = inputs.removeLineIds as string[];
+      const addLines = inputs.lines as Array<{merchandiseId: string; quantity: number}>;
+      if (!Array.isArray(removeLineIds) || !Array.isArray(addLines) || addLines.length !== 1) {
+        throw new Response('Invalid cart replacement', {status: 400});
+      }
+      const added = await cart.addLines(addLines);
+      if (added.errors?.length || added.userErrors?.length) {
+        return data({cart: added.cart, errors: added.errors?.length ? added.errors : added.userErrors, warnings: added.warnings}, {status: 409});
+      }
+      if (removeLineIds.length) {
+        const removed = await cart.removeLines(removeLineIds);
+        if (removed.errors?.length || removed.userErrors?.length) {
+          return data({cart: removed.cart, errors: removed.errors?.length ? removed.errors : removed.userErrors, warnings: removed.warnings}, {status: 409});
+        }
+        result = removed;
+      } else {
+        result = added;
+      }
+      break;
+    }
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
       break;

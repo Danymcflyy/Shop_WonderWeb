@@ -48,7 +48,10 @@ export function CartProgress({progress}: {progress: ProgressState}) {
         />
       </div>
       <p className="mt-1.5 text-xs text-muted">
-        {campaign.headline}. Bundles excluded. Applied automatically at checkout.
+        {campaign.headline}. Bundles excluded.{' '}
+        {campaign.discountSource === 'mock'
+          ? 'Demo calculation — not yet active in Shopify Checkout.'
+          : 'Applied automatically at checkout.'}
       </p>
     </div>
   );

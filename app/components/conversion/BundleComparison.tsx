@@ -31,6 +31,7 @@ export function BundleComparison({
         return (
           <article
             key={bundle.handle}
+            data-universe={bundle.universe}
             className={`relative flex w-[82%] shrink-0 snap-start flex-col rounded-(--radius-card) bg-surface p-4 sm:w-auto ${isHighlight ? 'border-[1.5px] border-ink shadow-card' : 'border border-line'}`}
           >
             {isHighlight ? (
@@ -39,7 +40,9 @@ export function BundleComparison({
               </span>
             ) : null}
             <p className="text-xs font-bold text-muted">
-              For {bundle.businessTags.map((t) => BUSINESS_LABEL[t]).join(', ')}
+              {bundle.businessTags.length
+                ? `For ${bundle.businessTags.map((t) => BUSINESS_LABEL[t]).join(', ')}`
+                : `WonderWeb ${bundle.universe === 'lifestyle' ? 'Lifestyle' : 'Pro'}`}
             </p>
             <h3 className="mt-1 text-lg leading-tight font-black">
               <Link to={`/products/${bundle.handle}`} className="hover:underline">
