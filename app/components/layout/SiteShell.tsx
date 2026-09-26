@@ -31,12 +31,12 @@ export function SiteShell({
       {/* Sets the CTA accent for the whole page (see tailwind.css). */}
       <div data-universe={universe?.id ?? 'pro'} className="contents">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:p-2">
-        Skip to content
+        Aller au contenu
       </a>
       <AnnouncementBar campaign={campaign} />
       {catalogSource === 'mock' ? (
         <p role="status" className="border-b border-line bg-highlight px-4 py-1.5 text-center text-xs font-bold text-ink">
-          Preview mode — draft catalogue, demo offers and checkout not yet activated.
+          Mode prévisualisation : catalogue en brouillon, offres de démonstration et paiement non activé.
         </p>
       ) : null}
       <SiteHeader onOpenMenu={() => setMenuOpen(true)} />
