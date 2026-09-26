@@ -5,6 +5,7 @@ import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {useCart} from '~/components/cart/CartProvider';
 import {SITE} from '~/lib/site';
+import {hasExpiredCartId} from '~/lib/cart-errors';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `Panier | ${SITE.name}`}];
@@ -36,7 +37,12 @@ export async function action({request, context}: Route.ActionArgs) {
       if (!Array.isArray(removeLineIds) || !Array.isArray(addLines) || addLines.length !== 1) {
         throw new Response('Invalid cart replacement', {status: 400});
       }
-      const added = await cart.addLines(addLines);
+      let added = await cart.addLines(addLines);
+      if (hasExpiredCartId(added.userErrors)) {
+        // Shopify invalidates the cart after checkout. Start a fresh cart with
+        // the requested line and let the existing response set its new cookie.
+        added = await cart.create({lines: addLines});
+      }
       if (added.errors?.length || added.userErrors?.length) {
         return data({cart: added.cart, errors: added.errors?.length ? added.errors : added.userErrors, warnings: added.warnings}, {status: 409});
       }
