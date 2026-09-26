@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react';
  * hydration mismatch), nothing without a valid date, and nothing once the
  * date has passed. It can never reset.
  */
-export function RealCountdown({endsAt, label = 'Ends in'}: {endsAt: string; label?: string}) {
+export function RealCountdown({endsAt, label = 'Se termine dans'}: {endsAt: string; label?: string}) {
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {

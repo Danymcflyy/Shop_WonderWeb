@@ -16,7 +16,7 @@ export function AnnouncementBar({campaign}: {campaign: Campaign | null}) {
           <>
             <Link to="/collections/all" className="inline-flex items-center gap-1.5 font-bold hover:underline">
               <Icon name="tag" className="size-3.5 text-cta" />
-              {campaign.headline} — {campaign.discountSource === 'mock' ? 'demo offer, Shopify activation pending' : 'applied automatically at checkout'}
+              {campaign.headline} — {campaign.discountSource === 'mock' ? 'offre de démonstration, non active au paiement' : 'remise appliquée automatiquement au paiement'}
             </Link>
             {campaign.endsAt ? <RealCountdown endsAt={campaign.endsAt} /> : null}
           </>
@@ -24,7 +24,7 @@ export function AnnouncementBar({campaign}: {campaign: Campaign | null}) {
           <span className="font-bold">{SITE.promise}</span>
         )}
         <span className="hidden items-center gap-1.5 text-surface/70 md:inline-flex">
-          <Icon name="download" className="size-3.5" /> Instant download
+          <Icon name="download" className="size-3.5" /> Fichiers disponibles après paiement
         </span>
       </div>
     </div>
