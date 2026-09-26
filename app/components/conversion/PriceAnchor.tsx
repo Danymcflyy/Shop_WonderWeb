@@ -25,10 +25,10 @@ export function PriceAnchor({
       {hasAnchor ? (
         <>
           <span className="text-sm text-muted">
-            <s className="tabular-nums">{formatMoney(separateCents)}</s> bought separately
+            <s className="tabular-nums">{formatMoney(separateCents)}</s> achetés séparément
           </span>
           <span className="rounded-[5px] bg-sale px-1.5 py-0.5 text-xs font-extrabold text-surface tabular-nums">
-            Save {formatMoney(savingsCents)}
+            Économisez {formatMoney(savingsCents)}
           </span>
         </>
       ) : null}

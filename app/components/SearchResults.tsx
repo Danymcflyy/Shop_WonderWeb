@@ -103,7 +103,7 @@ function SearchResultsProducts({
 
   return (
     <div className="search-result">
-      <h2>Products</h2>
+      <h2>Produits</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
@@ -135,7 +135,7 @@ function SearchResultsProducts({
             <div>
               <div>
                 <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                  {isLoading ? 'Chargement…' : <span>↑ Voir les précédents</span>}
                 </PreviousLink>
               </div>
               <div>
@@ -144,7 +144,7 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                  {isLoading ? 'Chargement…' : <span>Voir la suite ↓</span>}
                 </NextLink>
               </div>
             </div>
@@ -157,5 +157,5 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return <p>Aucun résultat. Essayez une autre recherche.</p>;
 }

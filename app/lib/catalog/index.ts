@@ -14,10 +14,10 @@ export type * from './types';
 export type SortKey = 'recommended' | 'price-asc' | 'price-desc' | 'newest';
 
 export const SORT_OPTIONS: Array<{key: SortKey; label: string}> = [
-  {key: 'recommended', label: 'Recommended'},
-  {key: 'price-asc', label: 'Price: low to high'},
-  {key: 'price-desc', label: 'Price: high to low'},
-  {key: 'newest', label: 'Newest'},
+  {key: 'recommended', label: 'Recommandés'},
+  {key: 'price-asc', label: 'Prix croissant'},
+  {key: 'price-desc', label: 'Prix décroissant'},
+  {key: 'newest', label: 'Nouveautés'},
 ];
 
 /**

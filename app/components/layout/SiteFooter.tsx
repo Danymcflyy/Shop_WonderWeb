@@ -30,25 +30,25 @@ export function SiteFooter() {
         {UNIVERSES.map((universe) => (
           <FooterColumn
             key={universe.id}
-            title={`${universe.label} — shop by problem`}
+            title={`${universe.label} — par besoin`}
             links={universe.nav
               .filter((item) => !item.children)
               .map((item) => ({label: item.label, to: item.to}))}
           />
         ))}
         <FooterColumn
-          title="Help"
+          title="Aide"
           links={[
-            {label: 'Delivery & file formats', to: '/#faq'},
-            {label: 'Refund policy', to: '/policies/refund-policy'},
-            {label: 'Terms of service', to: '/policies/terms-of-service'},
-            {label: 'Privacy policy', to: '/policies/privacy-policy'},
+            {label: 'Livraison et formats', to: '/#faq'},
+            {label: 'Politique de remboursement', to: '/policies/refund-policy'},
+            {label: 'Conditions de vente', to: '/policies/terms-of-service'},
+            {label: 'Politique de confidentialité', to: '/policies/privacy-policy'},
           ]}
         />
       </div>
       <div className="container-page flex flex-wrap justify-between gap-2 border-t border-line py-4 text-xs text-muted">
-        <span>© {new Date().getFullYear()} {SITE.name}. Prices in EUR.</span>
-        <span>Checkout and payment handled securely by Shopify.</span>
+        <span>© {new Date().getFullYear()} {SITE.name}. Prix en euros.</span>
+        <span>Commande et paiement sécurisés par Shopify.</span>
       </div>
     </footer>
   );

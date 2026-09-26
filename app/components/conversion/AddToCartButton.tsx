@@ -10,7 +10,7 @@ import {useCart, useCartStatus, type AddPlacement} from '~/components/cart/CartP
 export function AddToCartButton({
   handle,
   placement,
-  children = 'Add to cart',
+  children = 'Ajouter au panier',
   className = 'btn-cta',
 }: {
   handle: string;
@@ -29,7 +29,7 @@ export function AddToCartButton({
         className={`${className.replace('btn-cta', 'btn-secondary')} border-success text-success hover:bg-success/10 hover:text-success`}
       >
         <Icon name="check" />
-        {status === 'in-cart' ? 'In your cart' : 'Included in your bundle'}
+        {status === 'in-cart' ? 'Dans votre panier' : 'Inclus dans votre pack'}
       </button>
     );
   }

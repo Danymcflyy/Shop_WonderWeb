@@ -14,17 +14,17 @@ import {ProductPreview} from '~/components/product/ProductPreview';
 import {Icon} from '~/components/ui/Icon';
 
 const BUSINESS_FILTERS: Array<{id: BusinessTypeId; label: string}> = [
-  {id: 'artisans', label: 'Trades'},
-  {id: 'freelancers', label: 'Freelancers'},
-  {id: 'agencies', label: 'Agencies'},
+  {id: 'artisans', label: 'Artisans'},
+  {id: 'freelancers', label: 'Indépendants'},
+  {id: 'agencies', label: 'Agences'},
   {id: 'ecommerce', label: 'E-commerce'},
-  {id: 'local-shops', label: 'Local shops'},
+  {id: 'local-shops', label: 'Commerces locaux'},
 ];
 
 const KIND_LABEL: Record<CollectionDefinition['kind'], string> = {
-  problem: 'Shop by problem',
-  business: 'Shop by business type',
-  bundles: 'Bundles',
+  problem: 'Choisir par besoin',
+  business: 'Choisir par activité',
+  bundles: 'Packs',
   all: 'Catalogue',
 };
 
@@ -73,7 +73,7 @@ export function CollectionView({collection, products, sort, business}: Collectio
         <div className="container-page py-6 sm:py-8">
           <nav aria-label="Breadcrumb" className="text-xs font-semibold text-muted">
             <ol className="flex gap-1.5">
-              <li><Link to="/" className="hover:text-ink hover:underline">Home</Link></li>
+              <li><Link to="/" className="hover:text-ink hover:underline">Accueil</Link></li>
               <li aria-hidden>/</li>
               <li aria-current="page" className="text-ink">{collection.title}</li>
             </ol>
@@ -91,9 +91,9 @@ export function CollectionView({collection, products, sort, business}: Collectio
               <p className="mt-2 max-w-xl text-ink/70">{collection.outcome}</p>
             </div>
             <dl className="grid grid-cols-3 divide-x divide-line rounded-(--radius-control) border border-line text-center">
-              <Stat label="Tools" value={String(tools.length)} />
-              <Stat label="From" value={fromCents !== null ? formatMoney(fromCents) : '—'} />
-              <Stat label="Payment" value="Once" />
+              <Stat label="Outils" value={String(tools.length)} />
+              <Stat label="Dès" value={fromCents !== null ? formatMoney(fromCents) : '—'} />
+              <Stat label="Paiement" value="Unique" />
             </dl>
           </div>
         </div>
@@ -110,8 +110,8 @@ export function CollectionView({collection, products, sort, business}: Collectio
         >
           {showBusinessFilter ? (
             <fieldset className="flex flex-wrap items-center gap-2">
-              <legend className="sr-only">Filter by business type</legend>
-              <FilterChip name="for" value="" label="All businesses" checked={!business} />
+              <legend className="sr-only">Filtrer par activité</legend>
+              <FilterChip name="for" value="" label="Toutes les activités" checked={!business} />
               {BUSINESS_FILTERS.map((f) => (
                 <FilterChip key={f.id} name="for" value={f.id} label={f.label} checked={business === f.id} />
               ))}
@@ -120,7 +120,7 @@ export function CollectionView({collection, products, sort, business}: Collectio
             <span />
           )}
           <label className="flex items-center gap-2 text-sm font-semibold">
-            <span className="text-muted">Sort</span>
+            <span className="text-muted">Trier</span>
             <select
               name="sort"
               defaultValue={sort}
@@ -132,12 +132,12 @@ export function CollectionView({collection, products, sort, business}: Collectio
             </select>
           </label>
           <noscript>
-            <button type="submit" className="btn-secondary">Apply</button>
+            <button type="submit" className="btn-secondary">Appliquer</button>
           </noscript>
         </Form>
 
         <p className="mt-4 text-sm text-muted" aria-live="polite">
-          {products.length} {products.length === 1 ? 'product' : 'products'}
+          {products.length} {products.length === 1 ? 'produit' : 'produits'}
         </p>
 
         {products.length ? (
@@ -148,14 +148,14 @@ export function CollectionView({collection, products, sort, business}: Collectio
           </ul>
         ) : (
           <div className="card mt-3 p-8 text-center">
-            <p className="font-extrabold">No tools match this filter yet.</p>
-            <Link to={`/collections/${collection.handle}`} className="btn-ghost mt-2">Clear the filter</Link>
+            <p className="font-extrabold">Aucun outil ne correspond à ce filtre.</p>
+            <Link to={`/collections/${collection.handle}`} className="btn-ghost mt-2">Effacer le filtre</Link>
           </div>
         )}
 
         <section className="mt-12">
           <h2 className="text-xs font-extrabold tracking-[0.08em] uppercase">
-            {universe ? 'Other problems we solve' : 'Browse by universe'}
+            {universe ? 'Autres besoins couverts' : 'Explorer les univers'}
           </h2>
           <ul className="mt-3 flex flex-wrap gap-2">
             {related.map((item) => (
@@ -184,7 +184,7 @@ function ProductGridItem({product, insertOffer}: {product: ProductSummary; inser
               <Icon name="tag" className="size-5" /> {campaign.headline}
             </p>
             <p className="text-sm text-ink/75">
-              Mix any tools from any category. Bundles excluded. Applied automatically at checkout.
+              Combinez des outils de toutes les catégories. Les packs sont exclus. La remise s’applique automatiquement au paiement.
             </p>
           </div>
         </li>
@@ -197,28 +197,28 @@ function CollectionBundleBanner({bundle}: {bundle: ProductSummary}) {
   const {index} = useCart();
   const value = getBundleValue(bundle, index);
   return (
-    <section aria-label="Bundle for this collection" className="card grid items-center gap-4 border-[1.5px] border-ink p-3 sm:grid-cols-[140px_1fr_auto] sm:p-4">
+    <section aria-label="Pack de cette collection" className="card grid items-center gap-4 border-[1.5px] border-ink p-3 sm:grid-cols-[140px_1fr_auto] sm:p-4">
       <Link to={`/products/${bundle.handle}`} className="hidden sm:block" tabIndex={-1} aria-hidden>
         <ProductPreview product={bundle} size="thumb" />
       </Link>
       <div>
         <p className="text-[11px] font-extrabold tracking-[0.08em] text-sale uppercase">
-          Save {formatMoney(value.savingsCents)} with the bundle
+          Économisez {formatMoney(value.savingsCents)} avec le pack
         </p>
         <h2 className="mt-1 text-lg leading-tight font-black">
           <Link to={`/products/${bundle.handle}`} className="hover:underline">{bundle.title}</Link>
         </h2>
         <p className="mt-1 text-sm text-ink/70">
-          {value.items.length} tools: {value.items.map((i) => i.title).join(', ')}.
+          {value.items.length} outils : {value.items.map((i) => i.title).join(', ')}.
         </p>
       </div>
       <div className="flex items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
         <div className="sm:text-right">
           <span className="price text-2xl">{formatMoney(bundle.priceCents)}</span>
-          <p className="text-xs text-muted"><s>{formatMoney(value.separateCents)}</s> separately</p>
+          <p className="text-xs text-muted"><s>{formatMoney(value.separateCents)}</s> séparément</p>
         </div>
         <AddToCartButton handle={bundle.handle} placement="card" className="btn-cta px-4 py-2.5 text-sm">
-          Get the bundle
+          Choisir le pack
         </AddToCartButton>
       </div>
     </section>

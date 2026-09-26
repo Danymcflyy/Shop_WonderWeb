@@ -13,7 +13,7 @@ export type ProblemOption = {
 
 export function ProblemSelector({options}: {options: ProblemOption[]}) {
   return (
-    <nav aria-label="Shop by problem">
+    <nav aria-label="Choisir par besoin">
       <ul className="grid gap-2 sm:grid-cols-2">
         {options.map((option, i) => (
           <li key={option.collection}>

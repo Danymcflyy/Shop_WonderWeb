@@ -34,7 +34,7 @@ export function CrossSellCard({
         </div>
         <p className="mt-1 text-xs text-ink/70">{reason}</p>
         <AddToCartButton handle={product.handle} placement={placement} className="btn-secondary mt-2 px-3 py-1.5 text-xs">
-          + Add
+          + Ajouter
         </AddToCartButton>
       </div>
     </article>

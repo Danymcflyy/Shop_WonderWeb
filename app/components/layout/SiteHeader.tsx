@@ -15,12 +15,12 @@ export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
           type="button"
           onClick={onOpenMenu}
           className="-ml-2 grid size-10 place-items-center rounded-md hover:bg-paper lg:hidden"
-          aria-label="Open menu"
+          aria-label="Ouvrir le menu"
         >
           <Icon name="menu" className="size-5" />
         </button>
 
-        <Link to="/" prefetch="intent" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
+        <Link to="/" prefetch="intent" className="flex items-center gap-2" aria-label={`${SITE.name} accueil`}>
           <span className="grid size-8 place-items-center rounded-md bg-cta text-ink" aria-hidden>
             <Icon name="bolt" className="size-4.5" strokeWidth={2.5} />
           </span>
@@ -37,7 +37,7 @@ export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
             prefetch="intent"
             className="btn-ghost hidden sm:inline-flex"
           >
-            Save with bundles
+            Économiser avec les packs
           </Link>
           <CartButton />
         </div>
@@ -69,10 +69,10 @@ function CartButton() {
       type="button"
       onClick={() => open('header')}
       className="relative inline-flex items-center gap-2 rounded-(--radius-control) border-[1.5px] border-ink bg-surface px-3 py-2 text-sm font-extrabold hover:bg-paper"
-      aria-label={`Cart, ${count} ${count === 1 ? 'item' : 'items'}`}
+      aria-label={`Panier, ${count} ${count === 1 ? 'article' : 'articles'}`}
     >
       <Icon name="cart" className="size-5" />
-      <span className="hidden tabular-nums sm:inline">{count > 0 ? formatMoney(totals.totalCents) : 'Cart'}</span>
+      <span className="hidden tabular-nums sm:inline">{count > 0 ? formatMoney(totals.totalCents) : 'Panier'}</span>
       <span
         className={`grid min-w-5 place-items-center rounded-full px-1 text-[11px] leading-5 tabular-nums ${count > 0 ? 'bg-cta text-ink' : 'bg-paper text-muted'} ${pop ? 'animate-pop' : ''}`}
       >
@@ -87,7 +87,7 @@ const navLinkClass = ({isActive}: {isActive: boolean}) =>
 
 function DesktopNav({universe}: {universe: UniverseConfig}) {
   return (
-    <nav aria-label="Main" className="hidden border-t border-line lg:block">
+    <nav aria-label="Navigation principale" className="hidden border-t border-line lg:block">
       <ul className="container-page flex items-center gap-6">
         {universe.nav.map((item) => (
           <li key={item.label}>
@@ -159,7 +159,7 @@ function NavDropdown({item}: {item: NavItem}) {
 function MobileCategoryRail({universe}: {universe: UniverseConfig | null}) {
   const items = (universe?.nav ?? []).filter((item) => !item.children);
   return (
-    <nav aria-label="Categories" className="border-t border-line lg:hidden">
+    <nav aria-label="Catégories" className="border-t border-line lg:hidden">
       <ul className="flex items-center gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
         <li className="shrink-0">
           <UniverseSwitcher current={universe} />

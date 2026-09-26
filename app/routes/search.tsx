@@ -14,7 +14,7 @@ import type {
 } from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+  return [{title: `Recherche | WonderWeb`}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -42,19 +42,19 @@ export default function SearchPage() {
 
   return (
     <div className="search">
-      <h1>Search</h1>
+      <h1>Recherche</h1>
       <SearchForm>
         {({inputRef}) => (
           <>
             <input
               defaultValue={term}
               name="q"
-              placeholder="Search…"
+              placeholder="Rechercher…"
               ref={inputRef}
               type="search"
             />
             &nbsp;
-            <button type="submit">Search</button>
+            <button type="submit">Rechercher</button>
           </>
         )}
       </SearchForm>

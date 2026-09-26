@@ -29,7 +29,7 @@ export function ProductCard({product}: {product: ProductSummary}) {
           now={now}
           extra={
             bundleValue
-              ? [{label: `Save ${bundleValue.savingsPercent}%`, className: 'bg-sale text-surface'}]
+              ? [{label: `Économisez ${bundleValue.savingsPercent}%`, className: 'bg-sale text-surface'}]
               : undefined
           }
         />
@@ -47,10 +47,10 @@ export function ProductCard({product}: {product: ProductSummary}) {
               <span className="price text-2xl">{formatMoney(product.priceCents)}</span>
               {bundleValue ? (
                 <p className="text-xs text-muted">
-                  <s>{formatMoney(bundleValue.separateCents)}</s> separately
+                  <s>{formatMoney(bundleValue.separateCents)}</s> séparément
                 </p>
               ) : (
-                <p className="text-xs text-muted">One payment</p>
+                <p className="text-xs text-muted">Un seul paiement</p>
               )}
             </div>
             <AddToCartButton
@@ -58,7 +58,7 @@ export function ProductCard({product}: {product: ProductSummary}) {
               placement="card"
               className="btn-cta px-3.5 py-2 text-sm"
             >
-              <Icon name="plus" /> Add
+              <Icon name="plus" /> Ajouter
             </AddToCartButton>
           </div>
 
@@ -70,7 +70,7 @@ export function ProductCard({product}: {product: ProductSummary}) {
             >
               <Icon name="layers" className="size-3.5 shrink-0" />
               <span className="truncate">
-                In {bundleOffer.bundle.title} — save {bundleOffer.savingsPercent}%
+                Dans {bundleOffer.bundle.title} — économisez {bundleOffer.savingsPercent}%
               </span>
             </Link>
           ) : null}

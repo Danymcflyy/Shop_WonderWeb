@@ -32,10 +32,10 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
               {universe.hero.title} <span className="marker">{universe.hero.highlight}</span>
             </h1>
             <p className="mt-3 text-[15px] font-semibold text-ink/70">
-              {data.stats.tools} tools · {data.stats.bundles} bundles · from {formatMoney(data.stats.fromCents)}
+              {data.stats.tools} outils · {data.stats.bundles} packs · dès {formatMoney(data.stats.fromCents)}
             </p>
 
-            <h2 className="mt-8 mb-3 text-sm font-extrabold">What do you want to fix?</h2>
+            <h2 className="mt-8 mb-3 text-sm font-extrabold">Quel problème voulez-vous résoudre ?</h2>
             <ProblemSelector options={data.problems} />
 
             <div className="mt-6">
@@ -43,9 +43,9 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
             </div>
           </div>
 
-          <aside aria-label="Featured bundle" className="card self-start border-[1.5px] border-ink p-4 shadow-card sm:p-5">
+          <aside aria-label="Pack à la une" className="card self-start border-[1.5px] border-ink p-4 shadow-card sm:p-5">
             <div className="flex items-center justify-between gap-2">
-              <p className="kicker">Best-value bundle</p>
+              <p className="kicker">Pack avantageux</p>
             </div>
             <Link to={`/products/${heroBundle.handle}`} className="mt-3 block">
               <ProductPreview product={heroBundle} size="hero" />
@@ -64,11 +64,11 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
               <div>
                 <span className="price text-3xl">{formatMoney(heroBundle.priceCents)}</span>
                 <p className="text-xs text-muted">
-                  <s>{formatMoney(heroValue.separateCents)}</s> separately · save {formatMoney(heroValue.savingsCents)}
+                  <s>{formatMoney(heroValue.separateCents)}</s> séparément · économisez {formatMoney(heroValue.savingsCents)}
                 </p>
               </div>
               <AddToCartButton handle={heroBundle.handle} placement="homepage_bundle" className="btn-cta">
-                Get the bundle
+                Choisir le pack
               </AddToCartButton>
             </div>
           </aside>
@@ -78,12 +78,12 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       {/* 3. Outcomes → 4. Featured tools */}
       <section className="container-page py-12">
         <SectionHeading
-          kicker="Start here"
-          title="Where we’d start: the quickest wins"
-          intro="Staff picks. Each tool solves one clear problem, and its page shows how long setup takes."
+          kicker="Pour commencer"
+          title="Des outils pour avancer rapidement"
+          intro="Chaque outil répond à un besoin précis. Sa fiche indique le temps nécessaire pour commencer."
           action={
             <Link to={universe.allPath} className="btn-ghost">
-              All {data.stats.tools} tools <Icon name="arrow" />
+              Voir les {data.stats.tools} outils <Icon name="arrow" />
             </Link>
           }
         />
@@ -98,9 +98,9 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       <section className="border-y border-line bg-surface py-12">
         <div className="container-page">
           <SectionHeading
-            kicker="Bundles"
-            title="Need more than one tool? Bundles cost less."
-            intro="Every bundle is priced below its tools bought separately. The savings shown are calculated from current prices."
+            kicker="Packs"
+            title="Plusieurs outils à prix réduit"
+            intro="Chaque pack coûte moins cher que ses outils achetés séparément. Les économies affichées sont calculées à partir des prix actuels."
           />
           <BundleComparison bundles={data.bundles} index={index} highlight={spotlight?.handle} />
         </div>
@@ -109,7 +109,7 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       {/* 6. By business type */}
       {data.businessTypes.length ? (
       <section className="container-page py-12">
-        <SectionHeading kicker="By business type" title="Tools picked for how you work" />
+        <SectionHeading kicker="Par type d’activité" title="Des outils adaptés à votre métier" />
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {data.businessTypes.map((type) => (
             <li key={type.handle}>
@@ -121,10 +121,10 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
                 <span className="text-lg leading-tight font-black">{type.title}</span>
                 <span className="mt-1.5 text-sm text-ink/70">{type.problem}</span>
                 <span className="mt-auto pt-4 text-xs font-bold text-muted">
-                  {type.toolCount} tools{type.bundleTitle ? ` · ${type.bundleTitle}` : ''}
+                  {type.toolCount} outils{type.bundleTitle ? ` · ${type.bundleTitle}` : ''}
                 </span>
                 <span className="mt-2 inline-flex items-center gap-1 text-sm font-extrabold group-hover:underline">
-                  See the tools <Icon name="arrow" />
+                  Voir les outils <Icon name="arrow" />
                 </span>
               </Link>
             </li>
@@ -141,22 +141,22 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       <section className="bg-ink py-12 text-surface">
         <div className="container-page grid items-center gap-8 lg:grid-cols-2">
           <div>
-            <p className="kicker text-surface">Most complete bundle</p>
+            <p className="kicker text-surface">Le pack le plus complet</p>
             <h2 className="h-section mt-2">{spotlight.title}</h2>
             <p className="mt-3 max-w-lg text-surface/75">{spotlight.tagline}</p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
               <span className="price text-[40px] leading-none">{formatMoney(spotlight.priceCents)}</span>
               <span className="text-sm text-surface/70">
-                <s>{formatMoney(spotlightValue.separateCents)}</s> separately ·{' '}
-                <strong className="text-highlight">save {formatMoney(spotlightValue.savingsCents)}</strong>
+                <s>{formatMoney(spotlightValue.separateCents)}</s> séparément ·{' '}
+                <strong className="text-highlight">économisez {formatMoney(spotlightValue.savingsCents)}</strong>
               </span>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               <AddToCartButton handle={spotlight.handle} placement="homepage_bundle" className="btn-cta">
-                Get all {spotlightValue.items.length} tools
+                Choisir les {spotlightValue.items.length} outils
               </AddToCartButton>
               <Link to={`/products/${spotlight.handle}`} className="btn-secondary border-surface bg-transparent text-surface hover:bg-surface hover:text-ink">
-                See what’s inside
+                Voir le contenu
               </Link>
             </div>
           </div>
@@ -176,7 +176,7 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       <section id="faq" className="container-page grid gap-8 py-12 lg:grid-cols-[1fr_2fr]">
         <div>
           <p className="kicker">Questions</p>
-          <h2 className="h-section mt-2">Everything you need to know before buying.</h2>
+          <h2 className="h-section mt-2">Vos questions avant l’achat.</h2>
         </div>
         <FAQ items={GENERAL_FAQ} />
       </section>
@@ -185,15 +185,15 @@ export function UniverseHome({data}: {data: UniverseHomeData}) {
       <section className="container-page">
         <div className="card flex flex-col items-start justify-between gap-5 border-[1.5px] border-ink p-6 sm:flex-row sm:items-center sm:p-8">
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Pick the problem. Get the tool. Fix it this week.</h2>
-            <p className="mt-1 text-ink/70">{data.stats.tools} tools from {formatMoney(data.stats.fromCents)} · Instant download · No subscription</p>
+            <h2 className="text-2xl font-black tracking-tight">Choisissez le problème à résoudre.</h2>
+            <p className="mt-1 text-ink/70">{data.stats.tools} outils dès {formatMoney(data.stats.fromCents)} · Téléchargement après paiement · Sans abonnement</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to={universe.allPath} className="btn-cta">
-              Browse all tools <Icon name="arrow" />
+              Voir tous les outils <Icon name="arrow" />
             </Link>
             <Link to={universe.bundlesPath} className="btn-secondary">
-              Compare bundles
+              Comparer les packs
             </Link>
           </div>
         </div>
