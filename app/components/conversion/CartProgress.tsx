@@ -21,12 +21,12 @@ export function CartProgress({progress}: {progress: ProgressState}) {
         <p className="font-extrabold" aria-live="polite">
           {unlocked ? (
             <span className="inline-flex items-center gap-1.5 text-success">
-              <Icon name="check" /> {campaign.discountPercent}% bundle discount unlocked
+              <Icon name="check" /> Remise de {campaign.discountPercent}% débloquée
             </span>
           ) : (
             <>
-              Add {remaining} more {remaining === 1 ? 'tool' : 'tools'} to unlock{' '}
-              <span className="marker">{campaign.discountPercent}% off</span>
+              Ajoutez encore {remaining} {remaining === 1 ? 'outil' : 'outils'} pour obtenir{' '}
+              <span className="marker">{campaign.discountPercent}% de remise</span>
             </>
           )}
         </p>
@@ -48,10 +48,10 @@ export function CartProgress({progress}: {progress: ProgressState}) {
         />
       </div>
       <p className="mt-1.5 text-xs text-muted">
-        {campaign.headline}. Bundles excluded.{' '}
+        {campaign.headline}. Packs exclus.{' '}
         {campaign.discountSource === 'mock'
-          ? 'Demo calculation — not yet active in Shopify Checkout.'
-          : 'Applied automatically at checkout.'}
+          ? 'Calcul de démonstration, non actif au paiement.'
+          : 'Remise appliquée automatiquement au paiement.'}
       </p>
     </div>
   );

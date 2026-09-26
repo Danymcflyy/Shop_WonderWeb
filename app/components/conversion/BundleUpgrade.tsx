@@ -16,13 +16,13 @@ export function BundleUpgrade({offer}: {offer: BundleUpgradeOffer}) {
 
   return (
     <section ref={ref} className="rounded-(--radius-control) border-[1.5px] border-ink bg-highlight/60 p-3.5">
-      <p className="text-[11px] font-extrabold tracking-[0.08em] uppercase">Better value</p>
+      <p className="text-[11px] font-extrabold tracking-[0.08em] uppercase">Plus avantageux</p>
       <h4 className="mt-1 leading-tight font-extrabold">
-        Upgrade to the {bundle.title} for {formatMoney(deltaCents)} more
+        Passez au pack {bundle.title} pour {formatMoney(deltaCents)} de plus
       </h4>
       <p className="mt-1 text-xs text-ink/75">
-        Keeps your {replaces.length === 1 ? 'tool' : `${replaces.length} tools`} and adds {gains.length} more worth{' '}
-        {formatMoney(gainedValueCents)} on their own:
+        Conservez {replaces.length === 1 ? 'votre outil' : `vos ${replaces.length} outils`} et obtenez {gains.length} outil(s) supplémentaires d’une valeur de{' '}
+        {formatMoney(gainedValueCents)} achetés séparément :
       </p>
       <ul className="mt-2 space-y-1 text-xs">
         {gains.map((item) => (
@@ -33,7 +33,7 @@ export function BundleUpgrade({offer}: {offer: BundleUpgradeOffer}) {
         ))}
       </ul>
       <button type="button" onClick={() => add(bundle.handle, 'cart_bundle_upgrade')} className="btn-cta mt-3 w-full py-2.5 text-sm">
-        Upgrade for {formatMoney(deltaCents)}
+        Choisir le pack pour {formatMoney(deltaCents)} de plus
       </button>
     </section>
   );

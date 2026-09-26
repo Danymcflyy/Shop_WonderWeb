@@ -51,11 +51,11 @@ export function StickyPurchaseBar({
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{title}</p>
             <p className="text-xs text-muted">
-              <span className="price text-base text-ink">{formatMoney(priceCents)}</span> · Instant download
+              <span className="price text-base text-ink">{formatMoney(priceCents)}</span> · Téléchargement après paiement
             </p>
           </div>
           <AddToCartButton handle={handle} placement="pdp_sticky" className="btn-cta shrink-0 px-5 py-2.5 text-sm">
-            Add to cart
+            Ajouter au panier
           </AddToCartButton>
         </div>
       </div>

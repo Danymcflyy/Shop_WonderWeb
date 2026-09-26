@@ -2,9 +2,9 @@ import type {ProductSummary} from '~/lib/catalog/types';
 import {getBadges, type DisplayBadge} from '~/lib/offer-engine';
 
 const STYLES: Record<DisplayBadge, {label: string; className: string}> = {
-  'best-seller': {label: 'Best-seller', className: 'bg-ink text-surface'},
-  new: {label: 'New', className: 'bg-blue text-surface'},
-  featured: {label: 'Staff pick', className: 'bg-highlight text-ink border border-ink/15'},
+  'best-seller': {label: 'Meilleure vente', className: 'bg-ink text-surface'},
+  new: {label: 'Nouveau', className: 'bg-blue text-surface'},
+  featured: {label: 'Notre sélection', className: 'bg-highlight text-ink border border-ink/15'},
 };
 
 /** Badges come from getBadges(): best-seller only with real sales data. */

@@ -7,7 +7,7 @@ import {useCart} from '~/components/cart/CartProvider';
 import {SITE} from '~/lib/site';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Cart | ${SITE.name}`}];
+  return [{title: `Panier | ${SITE.name}`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -137,13 +137,13 @@ export default function Cart() {
 
   return (
     <div className="container-page py-16">
-      <h1 className="h-section">Your cart</h1>
+      <h1 className="h-section">Votre panier</h1>
       <p className="mt-2 text-ink/70">
-        {ready ? `${lines.length} ${lines.length === 1 ? 'item' : 'items'} in your cart.` : 'Loading…'}
+        {ready ? `${lines.length} ${lines.length === 1 ? 'article' : 'articles'} dans votre panier.` : 'Chargement…'}
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
-        <button type="button" onClick={() => open('cart_page')} className="btn-cta">Open cart</button>
-        <Link to="/collections/all" className="btn-secondary">Continue shopping</Link>
+        <button type="button" onClick={() => open('cart_page')} className="btn-cta">Ouvrir le panier</button>
+        <Link to="/collections/all" className="btn-secondary">Continuer les achats</Link>
       </div>
     </div>
   );

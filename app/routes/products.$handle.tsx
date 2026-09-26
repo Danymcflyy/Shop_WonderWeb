@@ -21,25 +21,25 @@ import {FAQ} from '~/components/conversion/FAQ';
 import {Icon} from '~/components/ui/Icon';
 
 export const meta: Route.MetaFunction = ({data}) => [
-  {title: `${data?.product.title ?? 'Product'} — ${data ? formatMoney(data.product.priceCents) : ''} | ${SITE.name}`},
+  {title: `${data?.product.title ?? 'Produit'} — ${data ? formatMoney(data.product.priceCents) : ''} | ${SITE.name}`},
   {name: 'description', content: data?.product.tagline ?? ''},
 ];
 
 const PROBLEM_COLLECTION: Record<string, {label: string; to: string}> = {
-  'find-clients': {label: 'Find clients', to: '/collections/find-clients'},
-  profit: {label: 'Make more profit', to: '/collections/make-more-profit'},
-  organize: {label: 'Get organized', to: '/collections/get-organized'},
+  'find-clients': {label: 'Trouver des clients', to: '/collections/find-clients'},
+  profit: {label: 'Améliorer sa rentabilité', to: '/collections/make-more-profit'},
+  organize: {label: 'Mieux s’organiser', to: '/collections/get-organized'},
   marketing: {label: 'Marketing', to: '/collections/marketing'},
-  local: {label: 'Local business', to: '/collections/local-business'},
-  money: {label: 'Budget & money', to: '/collections/money'},
-  home: {label: 'Organised home', to: '/collections/home'},
-  wellbeing: {label: 'Habits & wellbeing', to: '/collections/wellbeing'},
+  local: {label: 'Commerce local', to: '/collections/local-business'},
+  money: {label: 'Budget et finances', to: '/collections/money'},
+  home: {label: 'Maison organisée', to: '/collections/home'},
+  wellbeing: {label: 'Habitudes et bien-être', to: '/collections/wellbeing'},
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {
   const catalog = getCatalog(context.env);
   const [product, index] = await Promise.all([catalog.getProduct(params.handle), catalog.getIndex()]);
-  if (!product) throw data({message: 'Product not found'}, {status: 404});
+  if (!product) throw data({message: 'Produit introuvable'}, {status: 404});
 
   const summary = toSummary(product);
   return {
@@ -67,7 +67,7 @@ export default function ProductPage() {
   const countsTowardCampaign = campaign && isEligibleForCampaign(summary, campaign);
   const universe = getUniverse(product.universe)!;
   const breadcrumb =
-    PROBLEM_COLLECTION[product.offer.problemTags[0]] ?? {label: 'All tools', to: universe.allPath};
+    PROBLEM_COLLECTION[product.offer.problemTags[0]] ?? {label: 'Tous les outils', to: universe.allPath};
   const faq = [...product.faq, ...GENERAL_FAQ];
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function ProductPage() {
       {/* 1. Breadcrumb */}
       <nav aria-label="Breadcrumb" className="container-page pt-4 text-xs font-semibold text-muted">
         <ol className="flex flex-wrap gap-1.5">
-          <li><Link to="/" className="hover:text-ink hover:underline">Home</Link></li>
+          <li><Link to="/" className="hover:text-ink hover:underline">Accueil</Link></li>
           <li aria-hidden>/</li>
           <li>
             <Link to={universe.path} className="hover:text-ink hover:underline">{universe.label}</Link>
@@ -88,7 +88,7 @@ export default function ProductPage() {
           <li aria-hidden>/</li>
           <li>
             <Link to={isBundle ? universe.bundlesPath : breadcrumb.to} className="hover:text-ink hover:underline">
-              {isBundle ? 'Bundles' : breadcrumb.label}
+              {isBundle ? 'Packs' : breadcrumb.label}
             </Link>
           </li>
           <li aria-hidden>/</li>
@@ -107,7 +107,7 @@ export default function ProductPage() {
           <Badges
             product={summary}
             now={now}
-            extra={bundleValue ? [{label: `Save ${bundleValue.savingsPercent}%`, className: 'bg-sale text-surface'}] : undefined}
+            extra={bundleValue ? [{label: `Économisez ${bundleValue.savingsPercent}%`, className: 'bg-sale text-surface'}] : undefined}
           />
           <h1 className="mt-2 text-[30px] leading-[1.05] font-black tracking-[-0.025em] text-balance sm:text-[40px]">
             {product.title}
@@ -116,9 +116,9 @@ export default function ProductPage() {
 
           <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-(--radius-control) border border-line bg-line text-sm">
             <Fact icon="file" label="Format" value={product.format} />
-            <Fact icon="clock" label="Time to first result" value={product.timeToValue} />
+            <Fact icon="clock" label="Délai avant le premier résultat" value={product.timeToValue} />
             <div className="col-span-2 flex flex-wrap items-center gap-1.5 bg-surface px-3 py-2.5">
-              <span className="mr-1 text-xs font-bold text-muted">Opens in</span>
+              <span className="mr-1 text-xs font-bold text-muted">S’ouvre avec</span>
               {product.formats.map((f) => (
                 <span key={f} className="flex items-center gap-1 text-xs font-semibold">
                   <FormatChip format={f} />
@@ -139,7 +139,7 @@ export default function ProductPage() {
                   savingsCents={bundleValue?.savingsCents}
                 />
                 <AddToCartButton handle={product.handle} placement="pdp_hero" className="btn-cta mt-4 w-full py-3.5 text-base">
-                  Add to cart — {formatMoney(product.priceCents)}
+                  Ajouter au panier — {formatMoney(product.priceCents)}
                 </AddToCartButton>
               </div>
             )}
@@ -149,7 +149,7 @@ export default function ProductPage() {
             <p className="mt-3 flex items-start gap-2 rounded-md bg-highlight/70 px-3 py-2 text-sm">
               <Icon name="tag" className="mt-0.5 size-4 shrink-0" />
               <span>
-                <strong>Counts toward “{campaign.headline}”.</strong> Mix with any other tools; the discount is applied at checkout.
+                <strong>Compte pour « {campaign.headline} ».</strong> Combinez cet outil avec d’autres : la remise s’applique au paiement.
               </span>
             </p>
           ) : null}
@@ -164,7 +164,7 @@ export default function ProductPage() {
       <section className="container-page py-8">
         <div className="grid gap-3 md:grid-cols-2">
           <div className="card p-5 sm:p-6">
-            <p className="kicker">The problem</p>
+            <p className="kicker">Le problème</p>
             <h2 className="mt-2 text-xl leading-tight font-black">{product.problem.headline}</h2>
             <ul className="mt-4 space-y-2.5">
               {product.problem.points.map((point) => (
@@ -176,7 +176,7 @@ export default function ProductPage() {
             </ul>
           </div>
           <div className="card border-[1.5px] border-ink p-5 sm:p-6">
-            <p className="kicker">What changes</p>
+            <p className="kicker">Ce qui change</p>
             <h2 className="mt-2 text-xl leading-tight font-black">{product.outcome.headline}</h2>
             <ul className="mt-4 space-y-2.5">
               {product.outcome.points.map((point) => (
@@ -190,11 +190,11 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* 6. What you get */}
+      {/* 6. Ce que vous recevez */}
       <section className="container-page py-8">
-        <p className="kicker">What you get</p>
+        <p className="kicker">Ce que vous recevez</p>
         <h2 className="h-section mt-2">
-          {isBundle ? `${bundleValue!.items.length} complete tools in one download` : 'Everything in the download'}
+          {isBundle ? `${bundleValue!.items.length} outils complets en un téléchargement` : 'Tout le contenu du téléchargement'}
         </h2>
         {isBundle ? (
           <BundleContents bundle={summary} />
@@ -211,10 +211,10 @@ export default function ProductPage() {
         )}
       </section>
 
-      {/* 7. How it works */}
+      {/* 7. Comment ça marche */}
       <section className="container-page py-8">
-        <p className="kicker">How it works</p>
-        <h2 className="h-section mt-2">Three steps to your first result</h2>
+        <p className="kicker">Comment ça marche</p>
+        <h2 className="h-section mt-2">Trois étapes pour commencer</h2>
         <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-ink/70">
           <Icon name="clock" /> {product.timeToValue}
         </p>
@@ -233,7 +233,7 @@ export default function ProductPage() {
         <section className="container-page py-8">
           <div className="grid overflow-hidden rounded-(--radius-card) border border-line bg-surface md:grid-cols-[1fr_1fr]">
             <div className="p-5 sm:p-6">
-              <p className="kicker">Worked example</p>
+              <p className="kicker">Exemple concret</p>
               <h2 className="mt-2 text-xl font-black">{product.example.title}</h2>
               <p className="mt-3 text-[15px] text-ink/75">{product.example.setup}</p>
             </div>
@@ -252,8 +252,8 @@ export default function ProductPage() {
       {/* 10. Related tools */}
       {related.length ? (
         <section className="container-page py-8">
-          <p className="kicker">Works well with</p>
-          <h2 className="h-section mt-2">Tools that complete this one</h2>
+          <p className="kicker">À associer avec</p>
+          <h2 className="h-section mt-2">Des outils complémentaires</h2>
           <ul className="mt-5 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-3">
             {related.map(({product: item, reason}) => (
               <li key={item.handle} className="flex flex-col">
@@ -272,7 +272,7 @@ export default function ProductPage() {
       <section className="container-page grid gap-6 py-8 lg:grid-cols-[1fr_2fr]">
         <div>
           <p className="kicker">Questions</p>
-          <h2 className="h-section mt-2">Before you buy</h2>
+          <h2 className="h-section mt-2">Avant d’acheter</h2>
         </div>
         <FAQ items={faq} />
       </section>
@@ -290,7 +290,7 @@ export default function ProductPage() {
           <div className="flex shrink-0 items-center gap-4">
             <span className="price text-3xl">{formatMoney(product.priceCents)}</span>
             <AddToCartButton handle={product.handle} placement="pdp_final" className="btn-cta">
-              Add to cart
+              Ajouter au panier
             </AddToCartButton>
           </div>
         </div>
@@ -322,12 +322,12 @@ function PurchaseOptions({product, bundleOffer}: {product: ProductSummary; bundl
 
   return (
     <fieldset className="space-y-2">
-      <legend className="mb-2 text-sm font-extrabold">Choose your option</legend>
+      <legend className="mb-2 text-sm font-extrabold">Choisissez votre option</legend>
       <Option
         checked={choice === 'single'}
         onSelect={() => setChoice('single')}
-        title="This tool"
-        detail={`${product.format} · instant download`}
+        title="Cet outil"
+        detail={`${product.format} · téléchargement après paiement`}
         price={formatMoney(product.priceCents)}
       />
       <Option
@@ -337,9 +337,9 @@ function PurchaseOptions({product, bundleOffer}: {product: ProductSummary; bundl
           track('view_bundle_upgrade', {...productDimensions(bundle), bundle_id: bundle.factoryId, placement: 'pdp_option'});
         }}
         title={bundle.title}
-        detail={`This tool + ${others} more · ${formatMoney(separateCents)} separately`}
+        detail={`Cet outil + ${others} autres · ${formatMoney(separateCents)} séparément`}
         price={formatMoney(bundle.priceCents)}
-        tag={`Save ${formatMoney(savingsCents)}`}
+        tag={`Économisez ${formatMoney(savingsCents)}`}
       />
       <AddToCartButton
         key={selected.handle}
@@ -348,8 +348,8 @@ function PurchaseOptions({product, bundleOffer}: {product: ProductSummary; bundl
         className="btn-cta mt-2 w-full py-3.5 text-base"
       >
         {choice === 'single'
-          ? `Add to cart — ${formatMoney(product.priceCents)}`
-          : `Add the ${items.length}-tool bundle — ${formatMoney(bundle.priceCents)}`}
+          ? `Ajouter au panier — ${formatMoney(product.priceCents)}`
+          : `Ajouter le pack de ${items.length} outils — ${formatMoney(bundle.priceCents)}`}
       </AddToCartButton>
     </fieldset>
   );
@@ -399,20 +399,20 @@ function PdpBundleUpgrade({product, bundleOffer}: {product: ProductSummary; bund
     <section ref={ref} className="container-page py-8">
       <div className="grid gap-6 rounded-(--radius-card) border-[1.5px] border-ink bg-highlight/50 p-5 sm:p-7 lg:grid-cols-[1fr_1.1fr]">
         <div>
-          <p className="kicker">Better value</p>
+          <p className="kicker">Plus avantageux</p>
           <h2 className="h-section mt-2">{headline}</h2>
           <p className="mt-3 text-ink/75">
-            {product.title} is one of {items.length} tools in the {bundle.title}. {bundle.tagline}
+            {product.title} fait partie des {items.length} outils du pack {bundle.title}. {bundle.tagline}
           </p>
           <div className="mt-5">
             <PriceAnchor priceCents={bundle.priceCents} separateCents={separateCents} savingsCents={savingsCents} />
-            <p className="mt-1 text-sm text-muted">{savingsPercent}% less than buying the tools one by one.</p>
+            <p className="mt-1 text-sm text-muted">{savingsPercent}% de moins que les outils achetés séparément.</p>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">
             <AddToCartButton handle={bundle.handle} placement="pdp_bundle" className="btn-cta">
-              Get all {items.length} tools — {formatMoney(bundle.priceCents)}
+              Choisir les {items.length} outils — {formatMoney(bundle.priceCents)}
             </AddToCartButton>
-            <Link to={`/products/${bundle.handle}`} className="btn-secondary">See the bundle</Link>
+            <Link to={`/products/${bundle.handle}`} className="btn-secondary">Voir le pack</Link>
           </div>
         </div>
         <ul className="card divide-y divide-line self-start">
@@ -421,17 +421,17 @@ function PdpBundleUpgrade({product, bundleOffer}: {product: ProductSummary; bund
               <span className="flex items-center gap-2 text-sm font-bold">
                 <Icon name="check" className="size-4 shrink-0 text-success" strokeWidth={3} />
                 {item.title}
-                {item.handle === product.handle ? <span className="text-xs font-semibold text-muted">(this tool)</span> : null}
+                {item.handle === product.handle ? <span className="text-xs font-semibold text-muted">(cet outil)</span> : null}
               </span>
               <span className="text-sm text-muted tabular-nums">{formatMoney(item.priceCents)}</span>
             </li>
           ))}
           <li className="flex items-center justify-between px-4 py-3 text-sm">
-            <span className="font-bold">Bought separately</span>
+            <span className="font-bold">Achetés séparément</span>
             <s className="text-muted tabular-nums">{formatMoney(separateCents)}</s>
           </li>
           <li className="flex items-center justify-between px-4 py-3">
-            <span className="font-extrabold">Bundle price</span>
+            <span className="font-extrabold">Prix du pack</span>
             <span className="price text-xl">{formatMoney(bundle.priceCents)}</span>
           </li>
         </ul>
@@ -452,15 +452,15 @@ function BundleContents({bundle}: {bundle: ProductSummary}) {
             <Link to={`/products/${item.handle}`} className="text-sm leading-tight font-extrabold hover:underline">{item.title}</Link>
             <p className="mt-0.5 line-clamp-2 text-xs text-ink/70">{item.tagline}</p>
             <p className="mt-1 text-xs text-muted">
-              {item.format} · <span className="tabular-nums">{formatMoney(item.priceCents)}</span> alone
+              {item.format} · <span className="tabular-nums">{formatMoney(item.priceCents)}</span> seul
             </p>
           </div>
         </li>
       ))}
       <li className="flex flex-col justify-center rounded-(--radius-card) border-[1.5px] border-dashed border-ink bg-highlight/60 p-4">
-        <p className="text-sm">Bought separately: <s className="tabular-nums">{formatMoney(separateCents)}</s></p>
+        <p className="text-sm">Achetés séparément: <s className="tabular-nums">{formatMoney(separateCents)}</s></p>
         <p className="mt-1 text-lg font-black">
-          Bundle: {formatMoney(bundle.priceCents)} — you save {formatMoney(savingsCents)}
+          Pack : {formatMoney(bundle.priceCents)} — vous économisez {formatMoney(savingsCents)}
         </p>
       </li>
     </ul>
@@ -472,7 +472,7 @@ function IncludedFilesCompact({product, summary}: {product: {included: Array<{na
   return (
     <p className="mt-3 flex items-center gap-2 text-sm text-ink/70">
       <Icon name="download" className="size-4 shrink-0" />
-      {summary.bundleItems ? `${count} tools` : `${count} ${count === 1 ? 'file' : 'files'}`} delivered instantly after payment
+      {summary.bundleItems ? `${count} outils` : `${count} ${count === 1 ? 'fichier' : 'fichiers'}`} disponibles après paiement
     </p>
   );
 }

@@ -6,11 +6,11 @@ import {AddToCartButton} from '~/components/conversion/AddToCartButton';
 import {Icon} from '~/components/ui/Icon';
 
 const BUSINESS_LABEL: Record<string, string> = {
-  artisans: 'Trades',
-  freelancers: 'Freelancers',
-  agencies: 'Agencies',
+  artisans: 'Artisans',
+  freelancers: 'Indépendants',
+  agencies: 'Agences',
   ecommerce: 'E-commerce',
-  'local-shops': 'Local shops',
+  'local-shops': 'Commerces locaux',
 };
 
 /** Side-by-side bundle comparison. Savings = real standalone prices − bundle price. */
@@ -36,12 +36,12 @@ export function BundleComparison({
           >
             {isHighlight ? (
               <span className="absolute -top-2.5 left-4 rounded-[5px] bg-ink px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-surface uppercase">
-                Most complete
+                Le plus complet
               </span>
             ) : null}
             <p className="text-xs font-bold text-muted">
               {bundle.businessTags.length
-                ? `For ${bundle.businessTags.map((t) => BUSINESS_LABEL[t]).join(', ')}`
+                ? `Pour ${bundle.businessTags.map((t) => BUSINESS_LABEL[t]).join(', ')}`
                 : `WonderWeb ${bundle.universe === 'lifestyle' ? 'Lifestyle' : 'Pro'}`}
             </p>
             <h3 className="mt-1 text-lg leading-tight font-black">
@@ -58,7 +58,7 @@ export function BundleComparison({
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted">
-                {value.items.length} tools · <s>{formatMoney(value.separateCents)}</s> separately · you save{' '}
+                {value.items.length} outils · <s>{formatMoney(value.separateCents)}</s> séparément · économisez{' '}
                 <strong className="text-ink">{formatMoney(value.savingsCents)}</strong>
               </p>
             </div>
@@ -76,10 +76,10 @@ export function BundleComparison({
             </ul>
 
             <AddToCartButton handle={bundle.handle} placement="homepage_bundle" className="btn-cta mt-4 w-full py-2.5 text-sm">
-              Get the bundle
+              Choisir le pack
             </AddToCartButton>
             <Link to={`/products/${bundle.handle}`} className="btn-ghost mt-2 self-center text-xs">
-              See what’s inside
+              Voir le contenu
             </Link>
           </article>
         );

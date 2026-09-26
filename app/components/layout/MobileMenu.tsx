@@ -17,15 +17,15 @@ export function MobileMenu({open, onClose}: {open: boolean; onClose: () => void}
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-      <button type="button" tabIndex={-1} aria-label="Close menu" onClick={onClose} className="absolute inset-0 animate-fade-in bg-ink/45" />
+      <button type="button" tabIndex={-1} aria-label="Fermer le menu" onClick={onClose} className="absolute inset-0 animate-fade-in bg-ink/45" />
       <div ref={dialogRef} tabIndex={-1} className="absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col overflow-y-auto bg-surface">
         <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
           <span className="text-lg font-black">{SITE.name}</span>
-          <button ref={initialFocusRef} type="button" onClick={onClose} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Close menu">
+          <button ref={initialFocusRef} type="button" onClick={onClose} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Fermer le menu">
             <Icon name="close" className="size-5" />
           </button>
         </div>
-        <nav aria-label="Main" className="flex-1 px-2 py-3">
+        <nav aria-label="Navigation principale" className="flex-1 px-2 py-3">
           {UNIVERSES.map((universe) => (
             <section key={universe.id} data-universe={universe.id} className="mb-4 border-b border-line pb-3 last:border-0">
               <MenuLink to={universe.path} label={`WonderWeb ${universe.label}`} strong />

@@ -52,7 +52,7 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="cart-title">
       <button
         type="button"
-        aria-label="Close cart"
+        aria-label="Fermer le panier"
         tabIndex={-1}
         onClick={close}
         className="absolute inset-0 animate-fade-in bg-ink/45"
@@ -60,9 +60,9 @@ export function CartDrawer() {
       <aside ref={dialogRef} tabIndex={-1} className="absolute inset-y-0 right-0 flex w-full max-w-[440px] animate-drawer-in flex-col bg-surface shadow-2xl">
         <header className="flex items-center justify-between border-b border-line px-4 py-3.5">
           <h2 id="cart-title" className="text-lg font-black">
-            Your cart <span className="text-muted tabular-nums">({lines.length})</span>
+            Votre panier <span className="text-muted tabular-nums">({lines.length})</span>
           </h2>
-          <button ref={initialFocusRef} type="button" onClick={close} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Close cart">
+          <button ref={initialFocusRef} type="button" onClick={close} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Fermer le panier">
             <Icon name="close" className="size-5" />
           </button>
         </header>
@@ -79,7 +79,7 @@ export function CartDrawer() {
           ) : null}
 
           {!ready ? (
-            <p className="text-sm text-muted">Loading your cart…</p>
+            <p className="text-sm text-muted">Chargement du panier…</p>
           ) : lines.length === 0 ? (
             <EmptyCart onNavigate={close} />
           ) : (
@@ -98,14 +98,14 @@ export function CartDrawer() {
                         {item.title}
                       </Link>
                       <p className="mt-0.5 text-xs text-muted">
-                        {item.bundleItems ? `${item.bundleItems.length} tools included` : item.format} · Instant download
+                        {item.bundleItems ? `${item.bundleItems.length} outils inclus` : item.format} · Téléchargement après paiement
                       </p>
                       <button
                         type="button"
                         onClick={() => remove(item.handle)}
                         className="mt-1 text-xs font-semibold text-muted underline underline-offset-2 hover:text-sale"
                       >
-                        Remove
+                        Retirer
                       </button>
                     </div>
                     <span className="price text-sm">{formatMoney(item.priceCents)}</span>
@@ -117,7 +117,7 @@ export function CartDrawer() {
 
               {crossSells.length ? (
                 <section>
-                  <h3 className="mb-2 text-xs font-extrabold tracking-[0.08em] uppercase">Goes well with your cart</h3>
+                  <h3 className="mb-2 text-xs font-extrabold tracking-[0.08em] uppercase">Compléter votre panier</h3>
                   <div className="space-y-2">
                     {crossSells.map((offer) => (
                       <CrossSellCard key={offer.product.handle} offer={offer} placement="cart_cross_sell" onNavigate={close} />
@@ -133,7 +133,7 @@ export function CartDrawer() {
           <footer className="border-t border-line bg-surface px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <dl className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted">Subtotal</dt>
+                <dt className="text-muted">Sous-total</dt>
                 <dd className="tabular-nums">{formatMoney(totals.subtotalCents)}</dd>
               </div>
               {totals.discountCents > 0 ? (
@@ -152,11 +152,11 @@ export function CartDrawer() {
             </button>
             {checkoutNote ? (
               <p role="status" className="mt-2 rounded-md bg-highlight px-3 py-2 text-xs font-semibold">
-                Paiement indisponible dans cette prévisualisation. La livraison des fichiers doit être vérifiée avant l’activation.
+                Paiement temporairement indisponible. Réessayez plus tard.
               </p>
             ) : null}
             <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted">
-              <Icon name="download" className="size-3.5" /> Un seul paiement · livraison numérique à vérifier
+              <Icon name="download" className="size-3.5" /> Un seul paiement · fichiers livrés après paiement
             </p>
           </footer>
         ) : null}
@@ -168,8 +168,8 @@ export function CartDrawer() {
 function EmptyCart({onNavigate}: {onNavigate: () => void}) {
   return (
     <div className="py-4">
-      <p className="text-lg font-extrabold">Your cart is empty.</p>
-      <p className="mt-1 text-sm text-muted">Start with the problem you want to fix:</p>
+      <p className="text-lg font-extrabold">Votre panier est vide.</p>
+      <p className="mt-1 text-sm text-muted">Commencez par choisir un besoin :</p>
       {UNIVERSES.map((universe) => (
         <section key={universe.id} data-universe={universe.id} className="mt-4">
           <p className="mb-2 text-xs font-extrabold tracking-[0.08em] uppercase">
@@ -193,7 +193,7 @@ function EmptyCart({onNavigate}: {onNavigate: () => void}) {
         </section>
       ))}
       <Link to="/collections/bundles" onClick={onNavigate} className="btn-ghost mt-4">
-        Or compare all bundles <Icon name="arrow" />
+        Ou comparer tous les packs <Icon name="arrow" />
       </Link>
     </div>
   );
