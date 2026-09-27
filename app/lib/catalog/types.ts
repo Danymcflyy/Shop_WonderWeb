@@ -80,6 +80,8 @@ export type Product = {
   example?: {title: string; setup: string; result: string; note: string};
   faq: Array<{q: string; a: string}>;
   preview: {kind: PreviewKind; imageUrl?: string; alt?: string};
+  /** Product media in Shopify order. Used by the product page gallery. */
+  gallery?: Array<{url: string; alt: string}>;
   offer: OfferDefinition;
   /** Bundles only: handles of the tools included. */
   bundleItems?: string[];
