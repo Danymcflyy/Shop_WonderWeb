@@ -120,6 +120,14 @@ export function createShopifyCatalog(env: Env): Catalog {
       }
       cursor = result.data.products.pageInfo.hasNextPage ? result.data.products.pageInfo.endCursor : null;
     } while (cursor);
+    const byHandle = new Map(products.map((product) => [product.handle, product]));
+    for (const product of products) {
+      if (!product.bundleItems?.length) continue;
+      product.formats = [...new Set([
+        ...product.formats,
+        ...product.bundleItems.flatMap((handle) => byHandle.get(handle)?.formats ?? []),
+      ])];
+    }
     return products;
   })();
 
