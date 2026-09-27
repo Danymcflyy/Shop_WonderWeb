@@ -11,6 +11,7 @@ import {FORMAT_LABELS, GENERAL_FAQ, getUniverse, SITE} from '~/lib/site';
 import {useNow} from '~/lib/use-now';
 import {useCart} from '~/components/cart/CartProvider';
 import {ProductPreview, FormatChip} from '~/components/product/ProductPreview';
+import {ProductGallery} from '~/components/product/ProductGallery';
 import {AddToCartButton} from '~/components/conversion/AddToCartButton';
 import {Badges} from '~/components/conversion/Badges';
 import {PriceAnchor} from '~/components/conversion/PriceAnchor';
@@ -99,7 +100,7 @@ export default function ProductPage() {
       {/* 2–4. Hero: preview + price, CTA, reassurance */}
       <section className="container-page grid gap-6 py-5 lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:py-8">
         <div className="order-2 lg:sticky lg:top-32 lg:order-1 lg:self-start">
-          <ProductPreview product={summary} size="hero" />
+          {product.gallery?.length ? <ProductGallery title={product.title} images={product.gallery} /> : <ProductPreview product={summary} size="hero" />}
           <IncludedFilesCompact product={product} summary={summary} />
         </div>
 

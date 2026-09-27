@@ -37,7 +37,7 @@ export const SHOPIFY_CATALOG_QUERY = `#graphql
         id handle title description publishedAt
         factoryId: metafield(namespace: "custom", key: "factory_id") { value }
         factoryData: metafield(namespace: "custom", key: "factory_data") { value }
-        images(first: 9) { nodes { url altText } }
+        images(first: 12) { nodes { url altText } }
         variants(first: 1) { nodes { id availableForSale price { amount currencyCode } } }
       }
     }
@@ -57,7 +57,7 @@ type ShopifyNode = {
 
 function mapProduct(node: ShopifyNode): Product | null {
   const variant = node.variants.nodes[0];
-  if (!variant?.availableForSale || variant.price.currencyCode !== 'EUR' || !node.factoryId?.value || !node.factoryData?.value || node.images.nodes.length !== 9) return null;
+  if (!variant?.availableForSale || variant.price.currencyCode !== 'EUR' || !node.factoryId?.value || !node.factoryData?.value || node.images.nodes.length < 3) return null;
   let data: Partial<Product>;
   try {
     data = JSON.parse(node.factoryData.value) as Partial<Product>;
@@ -78,6 +78,7 @@ function mapProduct(node: ShopifyNode): Product | null {
     priceCents: cents,
     publishedAt: node.publishedAt,
     preview: {kind: data.preview?.kind || 'doc', imageUrl: image?.url, alt: image?.altText || node.title},
+    gallery: node.images.nodes.map((item) => ({url: item.url, alt: item.altText || node.title})),
     // These required values are checked above and supplied by the draft import.
     offer: data.offer,
     problem: data.problem,
