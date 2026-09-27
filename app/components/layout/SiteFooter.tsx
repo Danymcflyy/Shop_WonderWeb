@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {SITE, UNIVERSES} from '~/lib/site';
 import {TrustStrip} from '~/components/conversion/TrustStrip';
+import {BrandLogo} from '~/components/layout/BrandLogo';
 
 export function SiteFooter() {
   return (
@@ -10,7 +11,9 @@ export function SiteFooter() {
       </div>
       <div className="container-page grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="text-lg font-black">{SITE.name}</p>
+          <Link to="/" prefetch="intent" aria-label={`${SITE.name} accueil`}>
+            <BrandLogo />
+          </Link>
           <p className="mt-2 max-w-xs text-sm text-ink/70">{SITE.promise}</p>
           <ul className="mt-4 space-y-1.5">
             {UNIVERSES.map((universe) => (
