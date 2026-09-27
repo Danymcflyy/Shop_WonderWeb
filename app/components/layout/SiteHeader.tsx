@@ -5,6 +5,7 @@ import {useCurrentUniverse} from '~/lib/use-universe';
 import {formatMoney} from '~/lib/money';
 import {useCart} from '~/components/cart/CartProvider';
 import {Icon} from '~/components/ui/Icon';
+import {BrandLogo} from '~/components/layout/BrandLogo';
 
 export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
   const universe = useCurrentUniverse();
@@ -20,11 +21,8 @@ export function SiteHeader({onOpenMenu}: {onOpenMenu: () => void}) {
           <Icon name="menu" className="size-5" />
         </button>
 
-        <Link to="/" prefetch="intent" className="flex items-center gap-2" aria-label={`${SITE.name} accueil`}>
-          <span className="grid size-8 place-items-center rounded-md bg-cta text-ink" aria-hidden>
-            <Icon name="bolt" className="size-4.5" strokeWidth={2.5} />
-          </span>
-          <span className="text-lg font-black tracking-tight">{SITE.name}</span>
+        <Link to="/" prefetch="intent" className="flex items-center" aria-label={`${SITE.name} accueil`}>
+          <BrandLogo />
         </Link>
 
         <div className="ml-2 hidden lg:block">

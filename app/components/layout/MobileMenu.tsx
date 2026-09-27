@@ -1,9 +1,10 @@
 import {useEffect} from 'react';
 import {NavLink, useLocation} from 'react-router';
-import {SITE, UNIVERSES} from '~/lib/site';
+import {UNIVERSES} from '~/lib/site';
 import {useCurrentUniverse} from '~/lib/use-universe';
 import {Icon} from '~/components/ui/Icon';
 import {TrustStrip} from '~/components/conversion/TrustStrip';
+import {BrandLogo} from '~/components/layout/BrandLogo';
 import {useModalA11y} from '~/lib/use-modal-a11y';
 
 export function MobileMenu({open, onClose}: {open: boolean; onClose: () => void}) {
@@ -20,7 +21,7 @@ export function MobileMenu({open, onClose}: {open: boolean; onClose: () => void}
       <button type="button" tabIndex={-1} aria-label="Fermer le menu" onClick={onClose} className="absolute inset-0 animate-fade-in bg-ink/45" />
       <div ref={dialogRef} tabIndex={-1} className="absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col overflow-y-auto bg-surface">
         <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
-          <span className="text-lg font-black">{SITE.name}</span>
+          <BrandLogo />
           <button ref={initialFocusRef} type="button" onClick={onClose} className="grid size-9 place-items-center rounded-md hover:bg-paper" aria-label="Fermer le menu">
             <Icon name="close" className="size-5" />
           </button>

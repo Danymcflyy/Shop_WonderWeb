@@ -1,28 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none">
-  <style>
-    .stroke {
-      stroke: #000;
-    }
-    .fill {
-      fill: #000;
-    }
-    @media (prefers-color-scheme: dark) {
-      .stroke {
-        stroke: #fff;
-      }
-      .fill {
-        fill: #fff;
-      }
-    }
-  </style>
-  <path
-    class="stroke"
-    fill-rule="evenodd"
-    d="M16.1 16.04 1 8.02 6.16 5.3l5.82 3.09 4.88-2.57-5.82-3.1L16.21 0l15.1 8.02-5.17 2.72-5.5-2.91-4.88 2.57 5.5 2.92-5.16 2.72Z"
-  />
-  <path
-    class="fill"
-    fill-rule="evenodd"
-    d="M16.1 32 1 23.98l5.16-2.72 5.82 3.08 4.88-2.57-5.82-3.08 5.17-2.73 15.1 8.02-5.17 2.72-5.5-2.92-4.88 2.58 5.5 2.92L16.1 32Z"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#141210"/>
+  <svg x="10" y="11" width="44" height="44" viewBox="397.6 416.4 697.3 667.7">
+    <g transform="matrix(1.477083 0 0 1.476923 -317.178484 -20.740098)">
+      <path fill="#F4581C" d="M719.5 296 A235.5 206 0 0 0 484 502 V510 A34 34 0 0 0 518 544 H921 A34 34 0 0 0 955 510 V502 A235.5 206 0 0 0 719.5 296Z"/>
+      <g fill="#FFFFFF">
+        <circle cx="642" cy="398" r="22"/>
+        <circle cx="790" cy="398" r="22"/>
+      </g>
+      <g fill="#F4581C">
+        <rect x="492" y="572" width="36" height="104" rx="18"/>
+        <rect x="552" y="572" width="36" height="152" rx="18"/>
+        <rect x="612" y="572" width="36" height="112" rx="18"/>
+        <rect x="672" y="572" width="36" height="176" rx="18"/>
+        <rect x="732" y="572" width="36" height="176" rx="18"/>
+        <rect x="792" y="572" width="36" height="112" rx="18"/>
+        <rect x="852" y="572" width="36" height="152" rx="18"/>
+        <rect x="912" y="572" width="36" height="104" rx="18"/>
+      </g>
+    </g>
+  </svg>
 </svg>
