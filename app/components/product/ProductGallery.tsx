@@ -8,7 +8,7 @@ export function ProductGallery({title, images}: {title: string; images: GalleryI
   if (!current) return null;
 
   return (
-    <div aria-label={`Images du produit ${title}`}>
+    <div className="min-w-0 max-w-full" aria-label={`Images du produit ${title}`}>
       <div className="aspect-square overflow-hidden rounded-(--radius-control) border border-line bg-surface">
         <img
           key={current.url}
